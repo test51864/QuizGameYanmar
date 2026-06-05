@@ -4,6 +4,7 @@ import "./App.css";
 const ROUND_TIME = 18;
 const LEADERBOARD_KEY = "yanmar_power_league_scores";
 const LEADS_KEY = "yanmar_power_league_leads";
+const BEST_SCORE_KEY = "yanmar_power_league_best_score";
 
 const questionBank = {
   en: [
@@ -95,10 +96,16 @@ const copy = {
     changeLanguage: "Language",
     changeTeam: "Team",
     round: "Round",
+    total: "total",
     score: "Score",
     streak: "Streak",
     best: "Best",
+    bestScore: "Best score",
     time: "Time",
+    pause: "Pause",
+    resume: "Resume",
+    pausedTitle: "Match paused",
+    pausedText: "Take a breath. The timer waits for you.",
     powerPlay: "50/50 Power Play",
     powerUsed: "Power Play used",
     goal: "Goal",
@@ -142,10 +149,16 @@ const copy = {
     changeLanguage: "Taal",
     changeTeam: "Team",
     round: "Ronde",
+    total: "totaal",
     score: "Score",
     streak: "Streak",
     best: "Beste",
+    bestScore: "Beste score",
     time: "Tijd",
+    pause: "Pauze",
+    resume: "Verder",
+    pausedTitle: "Wedstrijd gepauzeerd",
+    pausedText: "Rustig aan. De timer wacht op je.",
     powerPlay: "50/50 Power Play",
     powerUsed: "Power Play gebruikt",
     goal: "Goal",
@@ -209,6 +222,14 @@ function readStoredList(key) {
     return JSON.parse(window.localStorage.getItem(key) || "[]");
   } catch (error) {
     return [];
+  }
+}
+
+function readStoredNumber(key) {
+  try {
+    return Number(window.localStorage.getItem(key) || 0);
+  } catch (error) {
+    return 0;
   }
 }
 
@@ -283,6 +304,23 @@ function TeamKit({ teamId }) {
   );
 }
 
+function RoundDots({ current, history, total }) {
+  return (
+    <div className="round-dots" aria-hidden="true">
+      {Array.from({ length: total }).map((_, index) => {
+        const result = history[index];
+        const state = result ? (result.correct ? "is-good" : "is-missed") : "";
+        return (
+          <span
+            key={index}
+            className={`round-dot ${state} ${index === current ? "is-current" : ""}`}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
 function Stadium({ feedback, shotState, teamId, t }) {
   const team = teams[teamId] || teams.netherlands;
 
@@ -296,11 +334,15 @@ function Stadium({ feedback, shotState, teamId, t }) {
         "--team-accent": team.accent,
       }}
     >
+      <div className="stadium-sky" />
+      <div className="floodlight floodlight-left" />
+      <div className="floodlight floodlight-right" />
       <div className="stadium-stands">
         <span>YANMAR</span>
         <span>POWER</span>
         <span>LEAGUE</span>
       </div>
+      <div className="pitch-stripes" />
       <div className="goal-frame">
         <span className="goal-net" />
       </div>
@@ -313,6 +355,7 @@ function Stadium({ feedback, shotState, teamId, t }) {
         <span className="keeper-leg keeper-leg-right" />
       </div>
       <div className="penalty-spot" />
+      <div className="ball-trail" />
       <div className="ball" aria-hidden="true">
         <span className="ball-core" />
       </div>
@@ -358,12 +401,14 @@ export default function App() {
   const [displayScore, setDisplayScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
+  const [bestScore, setBestScore] = useState(() => readStoredNumber(BEST_SCORE_KEY));
   const [selected, setSelected] = useState(null);
   const [feedback, setFeedback] = useState(null);
   const [shotState, setShotState] = useState("idle");
   const [timeLeft, setTimeLeft] = useState(ROUND_TIME);
   const [hiddenAnswers, setHiddenAnswers] = useState([]);
   const [powerPlayUsed, setPowerPlayUsed] = useState(false);
+  const [paused, setPaused] = useState(false);
   const [history, setHistory] = useState([]);
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -379,6 +424,7 @@ export default function App() {
   const timerPercent = Math.max(0, Math.min(100, (timeLeft / ROUND_TIME) * 100));
   const progressPercent = questions.length ? ((current + (phase === "complete" ? 1 : 0)) / questions.length) * 100 : 0;
   const resultLabel = getResultLabel(t, correctCount, questions.length || getQuestions(lang).length);
+  const answerLocked = paused || Boolean(feedback) || selected !== null;
 
   useEffect(() => {
     if (displayScore === score) return undefined;
@@ -393,7 +439,7 @@ export default function App() {
   }, [displayScore, score]);
 
   useEffect(() => {
-    if (phase !== "match" || feedback || selected !== null || !currentQuestion) return undefined;
+    if (phase !== "match" || feedback || selected !== null || paused || !currentQuestion) return undefined;
 
     if (timeLeft <= 0) {
       handleAnswer(null, true);
@@ -405,7 +451,13 @@ export default function App() {
     }, 1000);
 
     return () => window.clearTimeout(timer);
-  }, [phase, feedback, selected, timeLeft, currentQuestion]);
+  }, [phase, feedback, selected, paused, timeLeft, currentQuestion]);
+
+  useEffect(() => {
+    if (phase !== "complete" || score <= bestScore) return;
+    setBestScore(score);
+    window.localStorage.setItem(BEST_SCORE_KEY, String(score));
+  }, [phase, score, bestScore]);
 
   function resetRound(nextIndex) {
     setCurrent(nextIndex);
@@ -414,6 +466,7 @@ export default function App() {
     setShotState("idle");
     setTimeLeft(ROUND_TIME);
     setHiddenAnswers([]);
+    setPaused(false);
   }
 
   function chooseLanguage(nextLanguage) {
@@ -422,11 +475,13 @@ export default function App() {
     setTeam(null);
     setEmailSubmitted(false);
     setEmailError("");
+    setPaused(false);
     setPhase("team");
   }
 
   function chooseTeam(nextTeam) {
     setTeam(nextTeam);
+    setPaused(false);
     setPhase("ready");
   }
 
@@ -441,12 +496,13 @@ export default function App() {
     setEmail("");
     setEmailError("");
     setEmailSubmitted(false);
+    setPaused(false);
     resetRound(0);
     setPhase("match");
   }
 
   function handleAnswer(index, timedOut = false) {
-    if (feedback || selected !== null || !currentQuestion) return;
+    if (paused || feedback || selected !== null || !currentQuestion) return;
 
     const correct = index === currentQuestion.correct;
     const nextStreak = correct ? streak + 1 : 0;
@@ -476,7 +532,7 @@ export default function App() {
   }
 
   function usePowerPlay() {
-    if (powerPlayUsed || feedback || selected !== null || !currentQuestion) return;
+    if (paused || powerPlayUsed || feedback || selected !== null || !currentQuestion) return;
 
     const wrongAnswers = currentQuestion.answers
       .map((answer, index) => index)
@@ -492,6 +548,7 @@ export default function App() {
       setShotState("idle");
       setSelected(null);
       setFeedback(null);
+      setPaused(false);
       setPhase("complete");
       return;
     }
@@ -514,6 +571,7 @@ export default function App() {
     setTimeLeft(ROUND_TIME);
     setHiddenAnswers([]);
     setPowerPlayUsed(false);
+    setPaused(false);
     setHistory([]);
     setEmail("");
     setEmailError("");
@@ -620,7 +678,7 @@ export default function App() {
               <div className="match-facts">
                 <span>{questions.length} rounds</span>
                 <span>{ROUND_TIME}s timer</span>
-                <span>50/50</span>
+                <span>{t.bestScore}: {bestScore}</span>
               </div>
               <div className="panel-actions panel-actions-left">
                 <PrimaryButton onClick={startMatch}>{t.start}</PrimaryButton>
@@ -650,6 +708,7 @@ export default function App() {
             <div className="result-stats">
               <span>{t.best}: {bestStreak}</span>
               <span>{t.score}: {score}</span>
+              <span>{t.bestScore}: {Math.max(score, bestScore)}</span>
               <span>{team && selectedTeam ? t[selectedTeam.labelKey] : ""}</span>
             </div>
           </div>
@@ -698,19 +757,38 @@ export default function App() {
           <div className="match-status">
             <span>{t.score}: {displayScore}</span>
             <span>{t.streak}: {streak}</span>
+            <span>{t.bestScore}: {bestScore}</span>
             <span>{t.round} {current + 1}/{questions.length}</span>
+            <GhostButton
+              className="pause-button"
+              onClick={() => setPaused((value) => !value)}
+              disabled={Boolean(feedback) || selected !== null}
+            >
+              {paused ? t.resume : t.pause}
+            </GhostButton>
           </div>
         </header>
 
         <div className="progress-track" aria-hidden="true">
           <span style={{ width: `${progressPercent}%` }} />
         </div>
+        <RoundDots current={current} history={history} total={questions.length} />
 
         <div className="match-grid">
-          <div className="question-zone">
+          <div className={`question-zone ${paused ? "is-paused" : ""}`}>
+            {paused ? (
+              <div className="pause-shield" role="dialog" aria-modal="false">
+                <div>
+                  <strong>{t.pausedTitle}</strong>
+                  <p>{t.pausedText}</p>
+                  <PrimaryButton onClick={() => setPaused(false)}>{t.resume}</PrimaryButton>
+                </div>
+              </div>
+            ) : null}
+
             <div className="question-meta">
               <span>{t.round} {current + 1}</span>
-              <span>{questions.length} total</span>
+              <span>{questions.length} {t.total}</span>
             </div>
             <h1>{currentQuestion.question}</h1>
             <div className="timer-row">
@@ -732,7 +810,7 @@ export default function App() {
                     type="button"
                     className={`answer-option ${selected === index ? "is-selected" : ""} ${isCorrect ? "is-correct" : ""} ${isWrongPick ? "is-wrong" : ""} ${isHidden ? "is-hidden" : ""}`}
                     onClick={() => handleAnswer(index)}
-                    disabled={Boolean(feedback) || selected !== null || isHidden}
+                    disabled={answerLocked || isHidden}
                   >
                     <span className="answer-letter">{String.fromCharCode(65 + index)}</span>
                     <span>{isHidden ? "--" : answer}</span>
@@ -742,7 +820,7 @@ export default function App() {
             </div>
 
             <div className="power-row">
-              <GhostButton onClick={usePowerPlay} disabled={powerPlayUsed || Boolean(feedback) || selected !== null}>
+              <GhostButton onClick={usePowerPlay} disabled={powerPlayUsed || answerLocked}>
                 {powerPlayUsed ? t.powerUsed : t.powerPlay}
               </GhostButton>
             </div>
