@@ -1,78 +1,194 @@
 import React, { useEffect, useState } from "react";
+import "./App.css";
+
+const ROUND_TIME = 18;
+const QUESTIONS_PER_MATCH = 8;
+const LEADERBOARD_KEY = "yanmar_power_league_scores";
+const LEADS_KEY = "yanmar_power_league_leads";
 
 const questionBank = {
   en: [
     {
-      id: 1,
-      question: "Where does Yanmar come from?",
-      answers: ["Japan", "USA", "Germany"],
+      id: "en-origin",
+      category: "Brand",
+      level: 1,
+      question: "Where did Yanmar start?",
+      answers: ["Japan", "Brazil", "Canada"],
       correct: 0,
-      fact: "Yanmar was founded in Japan.",
+      fact: "Yanmar started in Japan and still carries that engineering identity.",
     },
     {
-      id: 2,
-      question: "No power on site?",
-      answers: ["Generator", "Tractor", "Boat"],
+      id: "en-generator",
+      category: "Power",
+      level: 1,
+      question: "Which Yanmar solution keeps work moving when site power is unavailable?",
+      answers: ["Generator", "Paint mixer", "Office printer"],
       correct: 0,
-      fact: "Generators provide power when electricity is unavailable.",
+      fact: "Generators provide temporary power for sites, events and remote work.",
     },
     {
-      id: 3,
-      question: "Compact tractor power?",
-      answers: ["10 hp", "25–50 hp", "200 hp"],
-      correct: 1,
-      fact: "Compact tractors balance size and power.",
+      id: "en-pump",
+      category: "Water",
+      level: 1,
+      question: "What is the main job of a pump?",
+      answers: ["Move water", "Measure wind", "Store fuel"],
+      correct: 0,
+      fact: "Pumps are used to move water quickly and reliably.",
     },
     {
-      id: 4,
-      question: "What does a pump do?",
-      answers: ["Move water", "Make energy", "Cool air"],
+      id: "en-marine",
+      category: "Marine",
+      level: 2,
+      question: "Where would you normally use a Yanmar marine engine?",
+      answers: ["Boat", "Skateboard", "Elevator"],
       correct: 0,
-      fact: "Pumps move water in real situations.",
+      fact: "Marine engines are built for boats and demanding water conditions.",
     },
     {
-      id: 5,
-      question: "Where is a Yanmar marine engine used?",
-      answers: ["Boat", "Car", "Train"],
+      id: "en-compact",
+      category: "Land",
+      level: 2,
+      question: "Why are compact tractors useful on small and medium sites?",
+      answers: ["They combine size and strength", "They only drive indoors", "They replace safety gear"],
       correct: 0,
-      fact: "Marine engines are used in boats.",
+      fact: "Compact tractors are valued because they work in tighter spaces while still delivering useful power.",
+    },
+    {
+      id: "en-diesel",
+      category: "Engine",
+      level: 2,
+      question: "What is diesel engine design mainly known for?",
+      answers: ["Durable torque", "Silent magic", "No maintenance ever"],
+      correct: 0,
+      fact: "Diesel engines are often chosen for torque, reliability and heavy-duty use.",
+    },
+    {
+      id: "en-service",
+      category: "Support",
+      level: 3,
+      question: "What helps Yanmar equipment stay ready after delivery?",
+      answers: ["Service and parts support", "Guesswork", "Removing manuals"],
+      correct: 0,
+      fact: "Good service, parts and checks keep machines ready for the next job.",
+    },
+    {
+      id: "en-safety",
+      category: "Worksite",
+      level: 3,
+      question: "Before operating machinery, what should always come first?",
+      answers: ["Safety check", "Maximum speed", "Skipping instructions"],
+      correct: 0,
+      fact: "A quick safety check protects people, machines and the job itself.",
+    },
+    {
+      id: "en-application",
+      category: "Application",
+      level: 3,
+      question: "Which match makes the most sense for irrigation or drainage?",
+      answers: ["Pump", "Marine display", "Ticket scanner"],
+      correct: 0,
+      fact: "Pumps are practical for irrigation, drainage and water transfer jobs.",
+    },
+    {
+      id: "en-range",
+      category: "Range",
+      level: 3,
+      question: "Yanmar equipment is often connected to which work areas?",
+      answers: ["Land, water and power", "Fashion and music only", "Kitchen appliances only"],
+      correct: 0,
+      fact: "Yanmar is associated with solutions for land, water and power applications.",
     },
   ],
   nl: [
     {
-      id: 1,
-      question: "Waar komt Yanmar vandaan?",
-      answers: ["Japan", "VS", "Duitsland"],
+      id: "nl-origin",
+      category: "Merk",
+      level: 1,
+      question: "Waar is Yanmar begonnen?",
+      answers: ["Japan", "Brazilie", "Canada"],
       correct: 0,
-      fact: "Yanmar is opgericht in Japan.",
+      fact: "Yanmar begon in Japan en draagt die technische identiteit nog steeds mee.",
     },
     {
-      id: 2,
-      question: "Geen stroom op locatie?",
-      answers: ["Generator", "Tractor", "Boot"],
+      id: "nl-generator",
+      category: "Power",
+      level: 1,
+      question: "Welke Yanmar-oplossing houdt werk draaiend zonder vaste stroom?",
+      answers: ["Generator", "Verfmenger", "Kantoorprinter"],
       correct: 0,
-      fact: "Generatoren leveren stroom als er geen elektriciteit is.",
+      fact: "Generatoren leveren tijdelijke stroom voor locaties, events en werk op afstand.",
     },
     {
-      id: 3,
-      question: "Hoeveel vermogen heeft een compacte tractor ongeveer?",
-      answers: ["10 pk", "25–50 pk", "200 pk"],
-      correct: 1,
-      fact: "Compacte tractors combineren formaat en kracht.",
+      id: "nl-pump",
+      category: "Water",
+      level: 1,
+      question: "Wat is de hoofdtaak van een pomp?",
+      answers: ["Water verplaatsen", "Wind meten", "Brandstof opslaan"],
+      correct: 0,
+      fact: "Pompen worden gebruikt om water snel en betrouwbaar te verplaatsen.",
     },
     {
-      id: 4,
-      question: "Wat doet een pomp?",
-      answers: ["Water verplaatsen", "Energie maken", "Lucht koelen"],
+      id: "nl-marine",
+      category: "Marine",
+      level: 2,
+      question: "Waar gebruik je normaal een Yanmar marine engine?",
+      answers: ["Boot", "Skateboard", "Lift"],
       correct: 0,
-      fact: "Pompen verplaatsen water in praktijksituaties.",
+      fact: "Marine engines zijn gemaakt voor boten en zware omstandigheden op het water.",
     },
     {
-      id: 5,
-      question: "Waar gebruik je een Yanmar marine engine?",
-      answers: ["Boot", "Auto", "Trein"],
+      id: "nl-compact",
+      category: "Land",
+      level: 2,
+      question: "Waarom zijn compacte tractors handig op kleine en middelgrote locaties?",
+      answers: ["Ze combineren formaat en kracht", "Ze rijden alleen binnen", "Ze vervangen veiligheidsmiddelen"],
       correct: 0,
-      fact: "Marine engines worden gebruikt in boten.",
+      fact: "Compacte tractors werken in krappe ruimtes en leveren toch bruikbaar vermogen.",
+    },
+    {
+      id: "nl-diesel",
+      category: "Motor",
+      level: 2,
+      question: "Waar staat dieselmotortechniek vooral om bekend?",
+      answers: ["Sterk koppel", "Stille magie", "Nooit onderhoud"],
+      correct: 0,
+      fact: "Dieselmotoren worden vaak gekozen voor koppel, betrouwbaarheid en zwaar werk.",
+    },
+    {
+      id: "nl-service",
+      category: "Support",
+      level: 3,
+      question: "Wat helpt Yanmar-machines klaar te houden na levering?",
+      answers: ["Service en onderdelen", "Gokken", "Handleidingen verwijderen"],
+      correct: 0,
+      fact: "Goede service, onderdelen en controles houden machines klaar voor de volgende klus.",
+    },
+    {
+      id: "nl-safety",
+      category: "Werkplek",
+      level: 3,
+      question: "Wat moet altijd eerst gebeuren voor je met machines werkt?",
+      answers: ["Veiligheidscheck", "Maximale snelheid", "Instructies overslaan"],
+      correct: 0,
+      fact: "Een korte veiligheidscheck beschermt mensen, machines en het werk zelf.",
+    },
+    {
+      id: "nl-application",
+      category: "Toepassing",
+      level: 3,
+      question: "Welke oplossing past het best bij irrigatie of drainage?",
+      answers: ["Pomp", "Marine display", "Ticket scanner"],
+      correct: 0,
+      fact: "Pompen zijn praktisch voor irrigatie, drainage en watertransport.",
+    },
+    {
+      id: "nl-range",
+      category: "Range",
+      level: 3,
+      question: "Met welke werkgebieden wordt Yanmar vaak verbonden?",
+      answers: ["Land, water en power", "Alleen mode en muziek", "Alleen keukenapparaten"],
+      correct: 0,
+      fact: "Yanmar wordt gekoppeld aan oplossingen voor land, water en power-toepassingen.",
     },
   ],
 };
@@ -80,317 +196,272 @@ const questionBank = {
 const copy = {
   en: {
     title: "Yanmar Power League",
-    chooseLanguage: "Choose your language",
-    chooseTeam: "Choose your team",
-    languageIntro: "Select a language to begin.",
-    teamIntro: "Choose a team before the match starts.",
+    subtitle: "Quiz. Strike. Climb the league.",
+    languageIntro: "Choose your language",
+    teamIntro: "Pick your match team",
+    readyTitle: "Match setup complete",
+    readyCopy: "Eight rapid rounds. Correct answers score goals, speed adds bonus points and a streak turns pressure into power.",
+    start: "Start match",
+    back: "Back",
+    changeLanguage: "Language",
+    changeTeam: "Team",
+    round: "Round",
+    score: "Score",
+    streak: "Streak",
+    best: "Best",
+    time: "Time",
+    powerPlay: "50/50 Power Play",
+    powerUsed: "Power Play used",
+    level: "Level",
+    goal: "Goal",
+    saved: "Saved",
+    timeout: "Time ran out",
+    next: "Next round",
+    finish: "Finish match",
+    complete: "Full time",
+    resultPerfect: "Yanmar League Champion",
+    resultStrong: "Power League Pro",
+    resultGood: "Reliable Starter",
+    resultTry: "Training Ground Ready",
+    correct: "Correct",
+    bonus: "Bonus",
+    prizeTitle: "Enter the prize draw",
+    prizeText: "Leave your email address to save the score and join the draw.",
+    emailPlaceholder: "Email address",
+    emailErrorEmpty: "Please enter your email address.",
+    emailErrorInvalid: "Please enter a valid email address.",
+    prizeButton: "Save score",
+    thanks: "Score saved",
+    thanksSub: "You are in the local leaderboard and prize draw.",
+    playAgain: "Play again",
+    newGame: "New setup",
+    leaderboard: "Leaderboard",
+    noScores: "No saved scores yet.",
     teamNetherlands: "Team Netherlands",
     teamJapan: "Team Japan",
-    start: "Start Match",
-    back: "Back",
-    intro:
-      "Score goals, test your Yanmar knowledge, and finish with a chance to win an awesome prize.",
-    goals: "Goals",
-    round: "Round",
-    goalText: "GOAL ⚽🔥",
-    saveText: "Saved by the keeper 🧤",
-    next: "Next Round",
-    finish: "Finish Match",
-    complete: "Penalty Shootout Complete",
-    score: "Score",
-    prizeTitle: "Win an awesome prize 🎁",
-    prizeText: "Leave your email address below for a chance to win.",
-    emailPlaceholder: "Enter your email address",
-    emailError1: "Please enter your email address.",
-    emailError2: "Please enter a valid email address.",
-    prizeBtn: "Enter Prize Draw",
-    thanks: "You're in! ✅",
-    thanksSub: "Thanks for joining the prize draw.",
-    playAgain: "Play Again",
-    changeLanguage: "Change language",
-    changeTeam: "Change team",
-    perfect: "Perfect striker!",
-    solid: "Strong performance!",
-    nice: "Nice effort!",
+    nlMotto: "Orange pressure, clean finish.",
+    jpMotto: "Calm build-up, sharp strike.",
   },
   nl: {
     title: "Yanmar Power League",
-    chooseLanguage: "Kies je taal",
-    chooseTeam: "Kies je team",
-    languageIntro: "Selecteer eerst een taal om te beginnen.",
-    teamIntro: "Kies daarna een team voordat de wedstrijd start.",
-    teamNetherlands: "Team Netherlands",
-    teamJapan: "Team Japan",
+    subtitle: "Quiz. Schiet. Klim in de league.",
+    languageIntro: "Kies je taal",
+    teamIntro: "Kies je wedstrijdteam",
+    readyTitle: "Wedstrijd staat klaar",
+    readyCopy: "Acht snelle rondes. Goede antwoorden scoren goals, snelheid geeft bonuspunten en een streak maakt druk om in power.",
     start: "Start wedstrijd",
     back: "Terug",
-    intro:
-      "Scoor goals, test je Yanmar-kennis en maak daarna kans op een te gekke prijs.",
-    goals: "Goals",
+    changeLanguage: "Taal",
+    changeTeam: "Team",
     round: "Ronde",
-    goalText: "GOAL ⚽🔥",
-    saveText: "Gepakt door de keeper 🧤",
+    score: "Score",
+    streak: "Streak",
+    best: "Beste",
+    time: "Tijd",
+    powerPlay: "50/50 Power Play",
+    powerUsed: "Power Play gebruikt",
+    level: "Level",
+    goal: "Goal",
+    saved: "Gepakt",
+    timeout: "Tijd voorbij",
     next: "Volgende ronde",
     finish: "Wedstrijd afronden",
-    complete: "Penalty Shootout klaar",
-    score: "Score",
-    prizeTitle: "Win een te gekke prijs 🎁",
-    prizeText:
-      "Laat hieronder je e-mailadres achter en maak kans om te winnen.",
-    emailPlaceholder: "Vul je e-mailadres in",
-    emailError1: "Vul je e-mailadres in.",
-    emailError2: "Vul een geldig e-mailadres in.",
-    prizeBtn: "Doe mee aan de winactie",
-    thanks: "Je doet mee! ✅",
-    thanksSub: "Bedankt voor het meedoen aan de winactie.",
+    complete: "Full time",
+    resultPerfect: "Yanmar League Champion",
+    resultStrong: "Power League Pro",
+    resultGood: "Betrouwbare Starter",
+    resultTry: "Training Ground Ready",
+    correct: "Goed",
+    bonus: "Bonus",
+    prizeTitle: "Doe mee aan de winactie",
+    prizeText: "Laat je e-mailadres achter om je score op te slaan en mee te doen.",
+    emailPlaceholder: "E-mailadres",
+    emailErrorEmpty: "Vul je e-mailadres in.",
+    emailErrorInvalid: "Vul een geldig e-mailadres in.",
+    prizeButton: "Score opslaan",
+    thanks: "Score opgeslagen",
+    thanksSub: "Je staat in de lokale leaderboard en doet mee aan de winactie.",
     playAgain: "Speel opnieuw",
-    changeLanguage: "Taal wijzigen",
-    changeTeam: "Team wijzigen",
-    perfect: "Perfecte spits!",
-    solid: "Sterke score!",
-    nice: "Netjes gedaan!",
+    newGame: "Nieuwe setup",
+    leaderboard: "Leaderboard",
+    noScores: "Nog geen opgeslagen scores.",
+    teamNetherlands: "Team Netherlands",
+    teamJapan: "Team Japan",
+    nlMotto: "Oranje druk, zuivere afronding.",
+    jpMotto: "Rustige opbouw, scherpe aanval.",
   },
 };
 
-function YanmarLogo() {
+const teams = {
+  netherlands: {
+    labelKey: "teamNetherlands",
+    short: "NL",
+    main: "#f97316",
+    secondary: "#21468b",
+    accent: "#ffffff",
+    flag: "netherlands",
+    mottoKey: "nlMotto",
+  },
+  japan: {
+    labelKey: "teamJapan",
+    short: "JP",
+    main: "#ffffff",
+    secondary: "#bc002d",
+    accent: "#101820",
+    flag: "japan",
+    mottoKey: "jpMotto",
+  },
+};
+
+function readStoredList(key) {
+  try {
+    return JSON.parse(window.localStorage.getItem(key) || "[]");
+  } catch (error) {
+    return [];
+  }
+}
+
+function writeStoredList(key, value) {
+  window.localStorage.setItem(key, JSON.stringify(value));
+}
+
+function pickQuestions(language) {
+  const source = questionBank[language] || questionBank.en;
+  return source
+    .map((question) => ({ question, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .slice(0, QUESTIONS_PER_MATCH)
+    .map(({ question }) => question);
+}
+
+function getResultLabel(t, correctCount, total) {
+  if (correctCount === total) return t.resultPerfect;
+  if (correctCount >= Math.ceil(total * 0.75)) return t.resultStrong;
+  if (correctCount >= Math.ceil(total * 0.5)) return t.resultGood;
+  return t.resultTry;
+}
+
+function BrandMark() {
   return (
-    <div
-      style={{ display: "flex", justifyContent: "center", margin: "0 auto" }}
-    >
-      <div
-        style={{
-          color: "#e6002d",
-          fontWeight: 900,
-          fontStyle: "italic",
-          letterSpacing: "2px",
-          fontSize: "64px",
-          lineHeight: 1,
-          textTransform: "uppercase",
-          textShadow: "0 6px 16px rgba(0,0,0,0.18)",
-        }}
-      >
-        YANMAR
-      </div>
+    <div className="brand-mark" aria-label="Yanmar Power League">
+      <span className="brand-name">YANMAR</span>
+      <span className="brand-bar" />
     </div>
   );
 }
 
-function GlassButton({ children, onClick, style = {} }) {
+function Flag({ type }) {
   return (
-    <button
-      onClick={onClick}
-      style={{
-        padding: "14px 22px",
-        borderRadius: "14px",
-        border: "1px solid rgba(255,255,255,0.25)",
-        background: "rgba(255,255,255,0.08)",
-        color: "white",
-        cursor: "pointer",
-        fontWeight: 700,
-        transition: "transform 0.15s ease, box-shadow 0.15s ease",
-        boxShadow: "0 10px 20px rgba(0,0,0,0.16)",
-        ...style,
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-1px)";
-        e.currentTarget.style.boxShadow = "0 16px 24px rgba(0,0,0,0.2)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-        e.currentTarget.style.boxShadow = "0 10px 20px rgba(0,0,0,0.16)";
-      }}
-      onMouseDown={(e) => {
-        e.currentTarget.style.transform = "scale(0.98)";
-      }}
-      onMouseUp={(e) => {
-        e.currentTarget.style.transform = "translateY(-1px)";
-      }}
-    >
+    <span className={`flag flag-${type}`} aria-hidden="true">
+      <span />
+    </span>
+  );
+}
+
+function PrimaryButton({ children, className = "", ...props }) {
+  return (
+    <button className={`btn btn-primary ${className}`} type="button" {...props}>
       {children}
     </button>
   );
 }
 
-function SelectCard({ onClick, title, children }) {
+function GhostButton({ children, className = "", ...props }) {
   return (
-    <button
-      onClick={onClick}
-      style={{
-        width: "100%",
-        padding: "16px",
-        borderRadius: "26px",
-        border: "1px solid rgba(255,255,255,0.18)",
-        background:
-          "linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06))",
-        color: "white",
-        cursor: "pointer",
-        boxShadow: "0 18px 36px rgba(0,0,0,0.22)",
-        backdropFilter: "blur(10px)",
-        transition: "transform 0.2s ease, box-shadow 0.2s ease",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-2px) scale(1.01)";
-        e.currentTarget.style.boxShadow = "0 24px 42px rgba(0,0,0,0.26)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0) scale(1)";
-        e.currentTarget.style.boxShadow = "0 18px 36px rgba(0,0,0,0.22)";
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          height: "140px",
-          borderRadius: "18px",
-          marginBottom: "16px",
-          overflow: "hidden",
-          position: "relative",
-          boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.18)",
-        }}
-      >
-        {children}
-      </div>
-      <div style={{ fontSize: "22px", fontWeight: 800, letterSpacing: 0.2 }}>
-        {title}
-      </div>
+    <button className={`btn btn-ghost ${className}`} type="button" {...props}>
+      {children}
     </button>
   );
 }
 
-function NLFlag() {
+function SelectionCard({ title, text, children, onClick }) {
   return (
-    <div style={{ width: "100%", height: "100%" }}>
-      <div style={{ height: "33.33%", background: "#AE1C28" }} />
-      <div style={{ height: "33.33%", background: "#FFFFFF" }} />
-      <div style={{ height: "33.33%", background: "#21468B" }} />
-    </div>
+    <button className="selection-card" type="button" onClick={onClick}>
+      <span className="selection-art">{children}</span>
+      <span className="selection-title">{title}</span>
+      <span className="selection-text">{text}</span>
+    </button>
   );
 }
 
-function UKFlag() {
+function TeamKit({ teamId }) {
+  const team = teams[teamId];
   return (
-    <div
+    <span
+      className={`team-kit team-kit-${teamId}`}
       style={{
-        width: "100%",
-        height: "100%",
-        position: "relative",
-        background: "#012169",
+        "--team-main": team.main,
+        "--team-secondary": team.secondary,
+        "--team-accent": team.accent,
       }}
     >
-      <div
-        style={{
-          position: "absolute",
-          width: "160%",
-          height: "18px",
-          background: "white",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%) rotate(35deg)",
-          transformOrigin: "center",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          width: "160%",
-          height: "18px",
-          background: "white",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%) rotate(-35deg)",
-          transformOrigin: "center",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          width: "160%",
-          height: "8px",
-          background: "#C8102E",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%) rotate(35deg)",
-          transformOrigin: "center",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          width: "160%",
-          height: "8px",
-          background: "#C8102E",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%) rotate(-35deg)",
-          transformOrigin: "center",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: "50%",
-          height: "30px",
-          background: "white",
-          transform: "translateY(-50%)",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          bottom: 0,
-          left: "50%",
-          width: "30px",
-          background: "white",
-          transform: "translateX(-50%)",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: "50%",
-          height: "14px",
-          background: "#C8102E",
-          transform: "translateY(-50%)",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          bottom: 0,
-          left: "50%",
-          width: "14px",
-          background: "#C8102E",
-          transform: "translateX(-50%)",
-        }}
-      />
-    </div>
+      <span className="kit-shirt" />
+      <span className="kit-badge">{team.short}</span>
+    </span>
   );
 }
 
-function ResultLabel({ score, total, t }) {
-  let text = t.nice;
-  if (score === total) text = t.perfect;
-  else if (score >= Math.ceil(total * 0.6)) text = t.solid;
+function Stadium({ feedback, shotState, teamId, t }) {
+  const team = teams[teamId] || teams.netherlands;
 
   return (
-    <div
+    <section
+      className={`stadium stadium-${shotState}`}
+      aria-label="Penalty field"
       style={{
-        display: "inline-block",
-        marginTop: "6px",
-        padding: "10px 16px",
-        borderRadius: "999px",
-        background: "rgba(255,255,255,0.12)",
-        border: "1px solid rgba(255,255,255,0.18)",
-        fontWeight: 800,
-        letterSpacing: 0.2,
+        "--team-main": team.main,
+        "--team-secondary": team.secondary,
+        "--team-accent": team.accent,
       }}
     >
-      {text}
+      <div className="stadium-stands">
+        <span>YANMAR</span>
+        <span>POWER</span>
+        <span>LEAGUE</span>
+      </div>
+      <div className="goal-frame">
+        <span className="goal-net" />
+      </div>
+      <div className="keeper" aria-hidden="true">
+        <span className="keeper-head" />
+        <span className="keeper-body" />
+        <span className="keeper-arm keeper-arm-left" />
+        <span className="keeper-arm keeper-arm-right" />
+        <span className="keeper-leg keeper-leg-left" />
+        <span className="keeper-leg keeper-leg-right" />
+      </div>
+      <div className="penalty-spot" />
+      <div className="ball" aria-hidden="true">
+        <span className="ball-core" />
+      </div>
+      <div className="pitch-mark pitch-mark-left" />
+      <div className="pitch-mark pitch-mark-right" />
+      {feedback ? (
+        <div className={`stadium-callout ${feedback.correct ? "is-goal" : "is-save"}`}>
+          {feedback.timedOut ? t.timeout : feedback.correct ? t.goal : t.saved}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function Leaderboard({ entries, t }) {
+  return (
+    <div className="leaderboard">
+      <h2>{t.leaderboard}</h2>
+      {entries.length === 0 ? (
+        <p>{t.noScores}</p>
+      ) : (
+        <ol>
+          {entries.slice(0, 5).map((entry, index) => (
+            <li key={`${entry.date}-${entry.email}-${index}`}>
+              <span className="leader-rank">#{index + 1}</span>
+              <span className="leader-name">{entry.name}</span>
+              <span className="leader-score">{entry.score}</span>
+            </li>
+          ))}
+        </ol>
+      )}
     </div>
   );
 }
@@ -398,809 +469,427 @@ function ResultLabel({ score, total, t }) {
 export default function App() {
   const [language, setLanguage] = useState(null);
   const [team, setTeam] = useState(null);
-  const [started, setStarted] = useState(false);
+  const [phase, setPhase] = useState("language");
+  const [questions, setQuestions] = useState(() => pickQuestions("en"));
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [displayScore, setDisplayScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
   const [selected, setSelected] = useState(null);
-  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedback, setFeedback] = useState(null);
   const [shotState, setShotState] = useState("idle");
-  const [screenFading, setScreenFading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(ROUND_TIME);
+  const [hiddenAnswers, setHiddenAnswers] = useState([]);
+  const [powerPlayUsed, setPowerPlayUsed] = useState(false);
+  const [history, setHistory] = useState([]);
   const [email, setEmail] = useState("");
-  const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [emailError, setEmailError] = useState("");
+  const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [leaderboard, setLeaderboard] = useState(() => readStoredList(LEADERBOARD_KEY));
 
   const lang = language || "en";
   const t = copy[lang];
-  const questions = questionBank[lang];
-  const q = questions[current];
-  const isLastQuestion = current === questions.length - 1;
+  const currentQuestion = questions[current];
+  const selectedTeam = team ? teams[team] : null;
+  const correctCount = history.filter((item) => item.correct).length;
+  const accuracy = questions.length ? Math.round((correctCount / questions.length) * 100) : 0;
+  const timerPercent = Math.max(0, Math.min(100, (timeLeft / ROUND_TIME) * 100));
+  const progressPercent = questions.length ? ((current + (phase === "complete" ? 1 : 0)) / questions.length) * 100 : 0;
+  const resultLabel = getResultLabel(t, correctCount, questions.length || QUESTIONS_PER_MATCH);
 
   useEffect(() => {
-    if (displayScore === score) return;
-    const timeout = setTimeout(() => {
-      setDisplayScore((prev) => (prev < score ? prev + 1 : score));
-    }, 140);
-    return () => clearTimeout(timeout);
+    if (displayScore === score) return undefined;
+
+    const timeout = window.setTimeout(() => {
+      const diff = score - displayScore;
+      const step = Math.max(1, Math.ceil(Math.abs(diff) / 10));
+      setDisplayScore((value) => (diff > 0 ? Math.min(score, value + step) : Math.max(score, value - step)));
+    }, 24);
+
+    return () => window.clearTimeout(timeout);
   }, [displayScore, score]);
 
-  const containerStyle = {
-    minHeight: "100vh",
-    background:
-      "radial-gradient(circle at top, #38bdf8 0%, #0f172a 38%, #166534 100%)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    fontFamily: "Arial, sans-serif",
-    color: "white",
-    padding: "24px",
-  };
+  useEffect(() => {
+    if (phase !== "match" || feedback || selected !== null || !currentQuestion) return undefined;
 
-  const cardStyle = {
-    width: "100%",
-    maxWidth: "980px",
-    padding: "30px",
-    borderRadius: "28px",
-    background: "rgba(255,255,255,0.12)",
-    backdropFilter: "blur(14px)",
-    boxShadow: "0 24px 50px rgba(0,0,0,0.35)",
-    textAlign: "center",
-    border: "1px solid rgba(255,255,255,0.16)",
-    opacity: screenFading ? 0.75 : 1,
-    transform: screenFading ? "scale(0.995)" : "scale(1)",
-    transition: "opacity 0.2s ease, transform 0.2s ease",
-  };
+    if (timeLeft <= 0) {
+      handleAnswer(null, true);
+      return undefined;
+    }
 
-  const answerButtonStyle = {
-    display: "block",
-    width: "100%",
-    margin: "10px auto",
-    padding: "14px 18px",
-    borderRadius: "16px",
-    background:
-      "linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.88))",
-    color: "#0f172a",
-    fontWeight: 700,
-    fontSize: "16px",
-    cursor: "pointer",
-    border: "1px solid rgba(255,255,255,0.6)",
-    boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
-    transition:
-      "transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease",
-  };
+    const timer = window.setTimeout(() => {
+      setTimeLeft((value) => Math.max(0, value - 1));
+    }, 1000);
 
-  function resetGameState() {
-    setStarted(false);
-    setCurrent(0);
-    setScore(0);
-    setDisplayScore(0);
+    return () => window.clearTimeout(timer);
+  }, [phase, feedback, selected, timeLeft, currentQuestion]);
+
+  function resetRound(nextIndex) {
+    setCurrent(nextIndex);
     setSelected(null);
-    setShowFeedback(false);
+    setFeedback(null);
     setShotState("idle");
-    setEmail("");
-    setEmailSubmitted(false);
-    setEmailError("");
-    setScreenFading(false);
-  }
-
-  function animateScreenChange(cb) {
-    setScreenFading(true);
-    setTimeout(() => {
-      cb();
-      setScreenFading(false);
-    }, 180);
+    setTimeLeft(ROUND_TIME);
+    setHiddenAnswers([]);
   }
 
   function chooseLanguage(nextLanguage) {
-    animateScreenChange(() => {
-      resetGameState();
-      setLanguage(nextLanguage);
-    });
+    setLanguage(nextLanguage);
+    setQuestions(pickQuestions(nextLanguage));
+    setTeam(null);
+    setEmailSubmitted(false);
+    setEmailError("");
+    setPhase("team");
   }
 
   function chooseTeam(nextTeam) {
-    animateScreenChange(() => {
-      setStarted(false);
-      setCurrent(0);
-      setScore(0);
-      setDisplayScore(0);
-      setSelected(null);
-      setShowFeedback(false);
-      setShotState("idle");
-      setEmail("");
-      setEmailSubmitted(false);
-      setEmailError("");
-      setScreenFading(false);
-      setTeam(nextTeam);
-    });
+    setTeam(nextTeam);
+    setPhase("ready");
   }
 
-  function handleAnswer(index) {
-    if (showFeedback) return;
+  function startMatch() {
+    setQuestions(pickQuestions(lang));
+    setScore(0);
+    setDisplayScore(0);
+    setStreak(0);
+    setBestStreak(0);
+    setPowerPlayUsed(false);
+    setHistory([]);
+    setEmail("");
+    setEmailError("");
+    setEmailSubmitted(false);
+    resetRound(0);
+    setPhase("match");
+  }
+
+  function handleAnswer(index, timedOut = false) {
+    if (feedback || selected !== null || !currentQuestion) return;
+
+    const correct = index === currentQuestion.correct;
+    const nextStreak = correct ? streak + 1 : 0;
+    const direction = index === 0 ? "left" : index === 2 ? "right" : "center";
+    const earned = correct ? 100 + timeLeft * 5 + nextStreak * 20 + currentQuestion.level * 15 : 0;
+
     setSelected(index);
-    const correct = index === q.correct;
-    setShotState(correct ? "goal" : "save");
-    setTimeout(() => {
-      if (correct) setScore((s) => s + 1);
-      setShowFeedback(true);
-    }, 520);
+    setShotState(timedOut ? "timeout" : correct ? `goal-${direction}` : `save-${direction}`);
+
+    window.setTimeout(() => {
+      setScore((value) => value + earned);
+      setStreak(nextStreak);
+      setBestStreak((value) => Math.max(value, nextStreak));
+      setHistory((items) => [
+        ...items,
+        {
+          id: currentQuestion.id,
+          correct,
+          answer: index,
+          timedOut,
+          earned,
+          timeLeft,
+        },
+      ]);
+      setFeedback({ correct, timedOut, earned });
+    }, 430);
   }
 
-  function next() {
-    if (current === questions.length - 1) {
-      animateScreenChange(() => setCurrent((c) => c + 1));
+  function usePowerPlay() {
+    if (powerPlayUsed || feedback || selected !== null || !currentQuestion) return;
+
+    const wrongAnswers = currentQuestion.answers
+      .map((answer, index) => index)
+      .filter((index) => index !== currentQuestion.correct);
+    const hidden = wrongAnswers.sort(() => Math.random() - 0.5).slice(0, 1);
+
+    setHiddenAnswers(hidden);
+    setPowerPlayUsed(true);
+  }
+
+  function goNext() {
+    if (current >= questions.length - 1) {
+      setShotState("idle");
+      setSelected(null);
+      setFeedback(null);
+      setPhase("complete");
       return;
     }
-    animateScreenChange(() => {
-      setCurrent((c) => c + 1);
-      setSelected(null);
-      setShowFeedback(false);
-      setShotState("idle");
-    });
+
+    resetRound(current + 1);
   }
 
-  function restart() {
-    animateScreenChange(() => {
-      setCurrent(0);
-      setScore(0);
-      setDisplayScore(0);
-      setSelected(null);
-      setShowFeedback(false);
-      setShotState("idle");
-      setEmail("");
-      setEmailSubmitted(false);
-      setEmailError("");
-    });
+  function resetSetup() {
+    setLanguage(null);
+    setTeam(null);
+    setPhase("language");
+    setQuestions(pickQuestions("en"));
+    setScore(0);
+    setDisplayScore(0);
+    setStreak(0);
+    setBestStreak(0);
+    setSelected(null);
+    setFeedback(null);
+    setShotState("idle");
+    setTimeLeft(ROUND_TIME);
+    setHiddenAnswers([]);
+    setPowerPlayUsed(false);
+    setHistory([]);
+    setEmail("");
+    setEmailError("");
+    setEmailSubmitted(false);
   }
 
-  function submitEmail() {
+  function submitEmail(event) {
+    event.preventDefault();
+
     const trimmed = email.trim();
     const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
 
     if (!trimmed) {
-      setEmailError(t.emailError1);
+      setEmailError(t.emailErrorEmpty);
       return;
     }
+
     if (!valid) {
-      setEmailError(t.emailError2);
+      setEmailError(t.emailErrorInvalid);
       return;
     }
 
     const entry = {
+      name: trimmed.split("@")[0].slice(0, 14) || "Player",
       email: trimmed,
       score,
+      correct: correctCount,
+      total: questions.length,
+      accuracy,
       team,
-      language,
+      language: lang,
       date: new Date().toISOString(),
     };
 
-    const existing = JSON.parse(localStorage.getItem("yanmar_leads") || "[]");
-    existing.push(entry);
-    localStorage.setItem("yanmar_leads", JSON.stringify(existing));
+    const nextLeaderboard = [...leaderboard, entry]
+      .sort((a, b) => b.score - a.score || b.correct - a.correct)
+      .slice(0, 10);
+    const nextLeads = [...readStoredList(LEADS_KEY), entry].slice(-50);
 
-    console.log("Stored emails:", existing);
-
+    writeStoredList(LEADERBOARD_KEY, nextLeaderboard);
+    writeStoredList(LEADS_KEY, nextLeads);
+    setLeaderboard(nextLeaderboard);
     setEmailError("");
     setEmailSubmitted(true);
   }
 
-  if (!language) {
+  if (phase === "language") {
     return (
-      <div style={containerStyle}>
-        <div style={cardStyle}>
-          <YanmarLogo />
-          <h1
-            style={{ fontSize: "46px", marginBottom: "8px", marginTop: "18px" }}
-          >
-            {copy.en.title}
-          </h1>
-          <p
-            style={{
-              fontSize: "18px",
-              opacity: 0.95,
-              maxWidth: "720px",
-              margin: "0 auto 24px auto",
-            }}
-          >
-            {copy.en.languageIntro}
-          </p>
-          <div
-            style={{ fontSize: "24px", fontWeight: 800, marginBottom: "18px" }}
-          >
-            {copy.en.chooseLanguage}
+      <main className="game-shell">
+        <section className="panel intro-panel">
+          <BrandMark />
+          <p className="eyebrow">{copy.en.subtitle}</p>
+          <h1>{copy.en.title}</h1>
+          <div className="selection-grid language-grid">
+            <SelectionCard title="Nederlands" text="NL" onClick={() => chooseLanguage("nl")}>
+              <Flag type="netherlands" />
+            </SelectionCard>
+            <SelectionCard title="English" text="EN" onClick={() => chooseLanguage("en")}>
+              <Flag type="uk" />
+            </SelectionCard>
           </div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-              gap: "20px",
-              maxWidth: "720px",
-              margin: "0 auto",
-            }}
-          >
-            <SelectCard onClick={() => chooseLanguage("nl")} title="Nederlands">
-              <NLFlag />
-            </SelectCard>
-            <SelectCard onClick={() => chooseLanguage("en")} title="English">
-              <UKFlag />
-            </SelectCard>
-          </div>
-        </div>
-      </div>
+        </section>
+      </main>
     );
   }
 
-  if (!team) {
+  if (phase === "team") {
     return (
-      <div style={containerStyle}>
-        <div style={cardStyle}>
-          <YanmarLogo />
-          <h1
-            style={{ fontSize: "46px", marginBottom: "8px", marginTop: "18px" }}
-          >
-            {t.title}
-          </h1>
-          <p
-            style={{
-              fontSize: "18px",
-              opacity: 0.95,
-              maxWidth: "720px",
-              margin: "0 auto 24px auto",
-            }}
-          >
-            {t.teamIntro}
-          </p>
-          <div
-            style={{ fontSize: "24px", fontWeight: 800, marginBottom: "18px" }}
-          >
-            {t.chooseTeam}
-          </div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-              gap: "20px",
-              maxWidth: "720px",
-              margin: "0 auto 24px auto",
-            }}
-          >
-            <SelectCard
-              onClick={() => chooseTeam("netherlands")}
-              title={t.teamNetherlands}
-            >
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  background: "#ff8c00",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "56px",
-                }}
+      <main className="game-shell">
+        <section className="panel intro-panel">
+          <BrandMark />
+          <p className="eyebrow">{t.languageIntro}</p>
+          <h1>{t.teamIntro}</h1>
+          <div className="selection-grid">
+            {Object.entries(teams).map(([teamId, teamInfo]) => (
+              <SelectionCard
+                key={teamId}
+                title={t[teamInfo.labelKey]}
+                text={t[teamInfo.mottoKey]}
+                onClick={() => chooseTeam(teamId)}
               >
-                🇳🇱
-              </div>
-            </SelectCard>
-            <SelectCard onClick={() => chooseTeam("japan")} title={t.teamJapan}>
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  background: "#0f2747",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "56px",
-                }}
-              >
-                🇯🇵
-              </div>
-            </SelectCard>
+                <TeamKit teamId={teamId} />
+              </SelectionCard>
+            ))}
           </div>
-          <GlassButton onClick={() => setLanguage(null)}>{t.back}</GlassButton>
-        </div>
-      </div>
+          <div className="panel-actions">
+            <GhostButton onClick={() => setPhase("language")}>{t.back}</GhostButton>
+          </div>
+        </section>
+      </main>
     );
   }
 
-  if (!started) {
+  if (phase === "ready" && selectedTeam) {
     return (
-      <div style={containerStyle}>
-        <div style={cardStyle}>
-          <YanmarLogo />
-          <div
-            style={{
-              display: "inline-block",
-              padding: "10px 16px",
-              borderRadius: "999px",
-              background: team === "netherlands" ? "#ff8c00" : "#0f2747",
-              marginTop: "18px",
-              fontWeight: 800,
-              boxShadow: "0 12px 24px rgba(0,0,0,0.18)",
-            }}
-          >
-            {team === "netherlands" ? "🇳🇱 Team Netherlands" : "🇯🇵 Team Japan"}
+      <main className="game-shell">
+        <section className="panel ready-panel">
+          <BrandMark />
+          <div className="ready-layout">
+            <div className="ready-copy">
+              <p className="eyebrow">{t[selectedTeam.labelKey]}</p>
+              <h1>{t.readyTitle}</h1>
+              <p>{t.readyCopy}</p>
+              <div className="match-facts">
+                <span>{QUESTIONS_PER_MATCH} rounds</span>
+                <span>{ROUND_TIME}s timer</span>
+                <span>50/50</span>
+              </div>
+              <div className="panel-actions panel-actions-left">
+                <PrimaryButton onClick={startMatch}>{t.start}</PrimaryButton>
+                <GhostButton onClick={() => setPhase("team")}>{t.changeTeam}</GhostButton>
+                <GhostButton onClick={resetSetup}>{t.changeLanguage}</GhostButton>
+              </div>
+            </div>
+            <Stadium feedback={null} shotState="idle" teamId={team} t={t} />
           </div>
-          <h1
-            style={{ fontSize: "46px", marginBottom: "8px", marginTop: "18px" }}
-          >
-            {t.title}
-          </h1>
-          <p
-            style={{
-              fontSize: "18px",
-              opacity: 0.95,
-              maxWidth: "720px",
-              margin: "0 auto 24px auto",
-            }}
-          >
-            {t.intro}
-          </p>
-          <button
-            onClick={() => setStarted(true)}
-            style={{
-              padding: "16px 26px",
-              borderRadius: "16px",
-              border: "none",
-              fontWeight: 800,
-              fontSize: "16px",
-              cursor: "pointer",
-              background: "linear-gradient(180deg, #fef08a, #facc15)",
-              color: "#0f172a",
-              boxShadow: "0 14px 24px rgba(0,0,0,0.25)",
-              transition: "transform 0.15s ease",
-            }}
-            onMouseDown={(e) => {
-              e.currentTarget.style.transform = "scale(0.98)";
-            }}
-            onMouseUp={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-            }}
-          >
-            {t.start}
-          </button>
-          <div
-            style={{
-              marginTop: "18px",
-              display: "flex",
-              justifyContent: "center",
-              gap: "12px",
-              flexWrap: "wrap",
-            }}
-          >
-            <GlassButton onClick={() => setLanguage(null)}>
-              {t.changeLanguage}
-            </GlassButton>
-            <GlassButton onClick={() => setTeam(null)}>
-              {t.changeTeam}
-            </GlassButton>
-          </div>
-        </div>
-      </div>
+        </section>
+      </main>
     );
   }
 
-  if (current >= questions.length) {
+  if (phase === "complete") {
     return (
-      <div style={containerStyle}>
-        <div style={cardStyle}>
-          <YanmarLogo />
-          <div
-            style={{
-              fontSize: "80px",
-              marginBottom: "10px",
-              marginTop: "18px",
-            }}
-          >
-            🏆
+      <main className="game-shell">
+        <section className="panel results-panel">
+          <BrandMark />
+          <p className="eyebrow">{t.complete}</p>
+          <h1>{resultLabel}</h1>
+          <div className="result-grid">
+            <div className="result-score">
+              <span>{displayScore}</span>
+              <small>{correctCount}/{questions.length} {t.correct} - {accuracy}%</small>
+            </div>
+            <div className="result-stats">
+              <span>{t.best}: {bestStreak}</span>
+              <span>{t.score}: {score}</span>
+              <span>{team && selectedTeam ? t[selectedTeam.labelKey] : ""}</span>
+            </div>
           </div>
-          <h1 style={{ fontSize: "42px", marginBottom: "6px" }}>
-            {t.complete}
-          </h1>
-          <h2
-            style={{
-              marginTop: 0,
-              color: "#fef08a",
-              fontSize: "48px",
-              fontWeight: 900,
-            }}
-          >
-            {t.score}: {score}/{questions.length}
-          </h2>
 
-          <ResultLabel score={score} total={questions.length} t={t} />
-
-          <div
-            style={{
-              width: "160px",
-              height: "160px",
-              borderRadius: "999px",
-              margin: "20px auto",
-              boxShadow:
-                "0 0 0 20px rgba(250,204,21,0.08), 0 0 60px rgba(250,204,21,0.2)",
-            }}
-          />
-
-          {!emailSubmitted ? (
-            <div style={{ maxWidth: "560px", margin: "20px auto 0 auto" }}>
-              <div
-                style={{
-                  fontSize: "28px",
-                  fontWeight: 800,
-                  marginBottom: "10px",
-                }}
-              >
-                {t.prizeTitle}
-              </div>
-              <p style={{ opacity: 0.96, marginBottom: "16px" }}>
-                {t.prizeText}
-              </p>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t.emailPlaceholder}
-                style={{
-                  width: "100%",
-                  padding: "16px 18px",
-                  borderRadius: "16px",
-                  border: "1px solid rgba(255,255,255,0.35)",
-                  outline: "none",
-                  fontSize: "16px",
-                  boxSizing: "border-box",
-                  background: "rgba(255,255,255,0.96)",
-                  color: "#0f172a",
-                  boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
-                }}
-              />
-              {emailError ? (
-                <div
-                  style={{
-                    color: "#fecaca",
-                    marginTop: "10px",
-                    fontWeight: 700,
-                  }}
-                >
-                  {emailError}
+          <div className="finish-grid">
+            <form className="prize-form" onSubmit={submitEmail} noValidate>
+              <h2>{t.prizeTitle}</h2>
+              <p>{t.prizeText}</p>
+              <label>
+                <span>{t.emailPlaceholder}</span>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder={t.emailPlaceholder}
+                  disabled={emailSubmitted}
+                />
+              </label>
+              {emailError ? <div className="form-error">{emailError}</div> : null}
+              {emailSubmitted ? (
+                <div className="form-success">
+                  <strong>{t.thanks}</strong>
+                  <span>{t.thanksSub}</span>
                 </div>
-              ) : null}
-              <button
-                onClick={submitEmail}
-                style={{
-                  marginTop: "16px",
-                  width: "100%",
-                  padding: "16px 18px",
-                  borderRadius: "16px",
-                  border: "none",
-                  cursor: "pointer",
-                  fontWeight: 800,
-                  fontSize: "16px",
-                  background: "linear-gradient(180deg, #fef08a, #facc15)",
-                  color: "#0f172a",
-                  boxShadow: "0 14px 24px rgba(0,0,0,0.25)",
-                }}
-              >
-                {t.prizeBtn}
-              </button>
-            </div>
-          ) : (
-            <div style={{ marginTop: "20px" }}>
-              <div
-                style={{ fontSize: "30px", fontWeight: 800, color: "#bbf7d0" }}
-              >
-                {t.thanks}
-              </div>
-              <p style={{ opacity: 0.96 }}>{t.thanksSub}</p>
-            </div>
-          )}
+              ) : (
+                <PrimaryButton className="full-width" type="submit">{t.prizeButton}</PrimaryButton>
+              )}
+            </form>
+            <Leaderboard entries={leaderboard} t={t} />
+          </div>
 
-          <GlassButton onClick={restart} style={{ marginTop: "24px" }}>
-            {t.playAgain}
-          </GlassButton>
-        </div>
-      </div>
+          <div className="panel-actions">
+            <PrimaryButton onClick={startMatch}>{t.playAgain}</PrimaryButton>
+            <GhostButton onClick={resetSetup}>{t.newGame}</GhostButton>
+          </div>
+        </section>
+      </main>
     );
   }
 
   return (
-    <div style={containerStyle}>
-      <div style={cardStyle}>
-        <YanmarLogo />
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-            marginTop: "18px",
-            marginBottom: "18px",
-          }}
-        >
-          <div
-            style={{
-              padding: "8px 14px",
-              borderRadius: "999px",
-              background: team === "netherlands" ? "#ff8c00" : "#0f2747",
-              fontWeight: 700,
-              boxShadow: "0 10px 20px rgba(0,0,0,0.16)",
-            }}
-          >
-            {team === "netherlands" ? "🇳🇱 Team Netherlands" : "🇯🇵 Team Japan"}
+    <main className="game-shell">
+      <section className="panel match-panel">
+        <header className="match-header">
+          <BrandMark />
+          <div className="match-status">
+            <span>{t.score}: {displayScore}</span>
+            <span>{t.streak}: {streak}</span>
+            <span>{t.round} {current + 1}/{questions.length}</span>
           </div>
-          <div
-            style={{
-              padding: "8px 14px",
-              borderRadius: "999px",
-              background: "rgba(255,255,255,0.14)",
-              fontWeight: 700,
-              boxShadow:
-                displayScore !== score
-                  ? "0 0 0 8px rgba(250,204,21,0.12)"
-                  : "0 10px 20px rgba(0,0,0,0.12)",
-              transform: displayScore !== score ? "scale(1.06)" : "scale(1)",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
-            }}
-          >
-            ⚽ {t.goals}: {displayScore}
-          </div>
-          <div
-            style={{
-              padding: "8px 14px",
-              borderRadius: "999px",
-              background: "rgba(255,255,255,0.14)",
-              fontWeight: 700,
-              boxShadow: "0 10px 20px rgba(0,0,0,0.12)",
-            }}
-          >
-            {t.round} {current + 1}/{questions.length}
-          </div>
+        </header>
+
+        <div className="progress-track" aria-hidden="true">
+          <span style={{ width: `${progressPercent}%` }} />
         </div>
 
-        <h2 style={{ fontSize: "34px", marginBottom: "18px" }}>{q.question}</h2>
-
-        <div
-          style={{
-            margin: "20px auto",
-            width: "100%",
-            height: 300,
-            borderRadius: 26,
-            background:
-              "linear-gradient(180deg, #93c5fd 0%, #86efac 30%, #166534 100%)",
-            position: "relative",
-            overflow: "hidden",
-            boxShadow:
-              "inset 0 18px 30px rgba(255,255,255,0.18), inset 0 -14px 22px rgba(0,0,0,0.18)",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 70,
-              background: "linear-gradient(180deg, #0f172a, #1e293b)",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              top: 28,
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: 250,
-              height: 116,
-              border: "6px solid white",
-              borderBottom: "none",
-              borderRadius: "18px 18px 0 0",
-              background:
-                "repeating-linear-gradient(90deg, rgba(255,255,255,0.22) 0 10px, rgba(255,255,255,0.06) 10px 20px)",
-              boxShadow:
-                shotState === "goal"
-                  ? "0 0 24px rgba(255,255,255,0.26)"
-                  : "none",
-              transition: "box-shadow 0.3s ease",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              top: 78,
-              left:
-                shotState === "save"
-                  ? "66%"
-                  : shotState === "goal"
-                  ? "48%"
-                  : "50%",
-              transform:
-                shotState === "save"
-                  ? "translateX(-50%) rotate(22deg) scale(1.14)"
-                  : shotState === "goal"
-                  ? "translateX(-50%) rotate(-6deg) scale(0.98)"
-                  : "translateX(-50%) rotate(0deg) scale(1)",
-              transition: "all 0.48s cubic-bezier(.2,.8,.2,1)",
-              zIndex: 4,
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-            }}
-          >
-            <div
-              style={{
-                fontSize: 72,
-                lineHeight: 1,
-                filter: "drop-shadow(0 6px 12px rgba(0,0,0,0.25))",
-              }}
-            >
-              🧤
+        <div className="match-grid">
+          <div className="question-zone">
+            <div className="question-meta">
+              <span>{currentQuestion.category}</span>
+              <span>{t.level} {currentQuestion.level}</span>
             </div>
-            <div
-              style={{
-                fontSize: 72,
-                lineHeight: 1,
-                filter: "drop-shadow(0 6px 12px rgba(0,0,0,0.25))",
-              }}
-            >
-              🧤
+            <h1>{currentQuestion.question}</h1>
+            <div className="timer-row">
+              <span>{t.time}: {timeLeft}s</span>
+              <span className="timer-track" aria-hidden="true">
+                <span style={{ width: `${timerPercent}%` }} />
+              </span>
             </div>
+
+            <div className="answer-grid">
+              {currentQuestion.answers.map((answer, index) => {
+                const isHidden = hiddenAnswers.includes(index);
+                const isCorrect = feedback && index === currentQuestion.correct;
+                const isWrongPick = feedback && selected === index && selected !== currentQuestion.correct;
+
+                return (
+                  <button
+                    key={answer}
+                    type="button"
+                    className={`answer-option ${selected === index ? "is-selected" : ""} ${isCorrect ? "is-correct" : ""} ${isWrongPick ? "is-wrong" : ""} ${isHidden ? "is-hidden" : ""}`}
+                    onClick={() => handleAnswer(index)}
+                    disabled={Boolean(feedback) || selected !== null || isHidden}
+                  >
+                    <span className="answer-letter">{String.fromCharCode(65 + index)}</span>
+                    <span>{isHidden ? "--" : answer}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="power-row">
+              <GhostButton onClick={usePowerPlay} disabled={powerPlayUsed || Boolean(feedback) || selected !== null}>
+                {powerPlayUsed ? t.powerUsed : t.powerPlay}
+              </GhostButton>
+            </div>
+
+            {feedback ? (
+              <div className={`feedback ${feedback.correct ? "is-correct" : "is-wrong"}`} aria-live="polite">
+                <div>
+                  <strong>{feedback.timedOut ? t.timeout : feedback.correct ? t.goal : t.saved}</strong>
+                  <p>{currentQuestion.fact}</p>
+                </div>
+                <span>{t.bonus}: +{feedback.earned}</span>
+                <PrimaryButton onClick={goNext}>{current >= questions.length - 1 ? t.finish : t.next}</PrimaryButton>
+              </div>
+            ) : null}
           </div>
-          <div
-            style={{
-              position: "absolute",
-              bottom:
-                shotState === "goal" ? 176 : shotState === "save" ? 118 : 18,
-              left:
-                shotState === "save"
-                  ? "66%"
-                  : shotState === "goal"
-                  ? "36%"
-                  : "50%",
-              transform:
-                shotState === "goal"
-                  ? "translateX(-50%) scale(0.7) rotate(-22deg)"
-                  : shotState === "save"
-                  ? "translateX(-50%) scale(0.92) rotate(6deg)"
-                  : "translateX(-50%) scale(1) rotate(0deg)",
-              fontSize: 40,
-              transition: "all 0.48s cubic-bezier(.2,.8,.2,1)",
-              zIndex: 3,
-              filter: "drop-shadow(0 6px 10px rgba(0,0,0,0.28))",
-            }}
-          >
-            ⚽
+
+          <div className="field-zone">
+            <div className="team-strip">
+              {selectedTeam ? (
+                <>
+                  <Flag type={selectedTeam.flag} />
+                  <span>{t[selectedTeam.labelKey]}</span>
+                </>
+              ) : null}
+            </div>
+            <Stadium feedback={feedback} shotState={shotState} teamId={team} t={t} />
           </div>
-          {shotState === "goal" ? (
-            <div
-              style={{
-                position: "absolute",
-                top: 108,
-                left: "36%",
-                transform: "translateX(-50%)",
-                width: 132,
-                height: 132,
-                borderRadius: "999px",
-                border: "3px solid rgba(255,255,255,0.3)",
-                boxShadow: "0 0 0 14px rgba(255,255,255,0.06)",
-                opacity: 0.8,
-              }}
-            />
-          ) : null}
-          <div
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: 72,
-              background: "rgba(255,255,255,0.08)",
-            }}
-          />
         </div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr",
-            gap: "10px",
-            maxWidth: "680px",
-            margin: "0 auto",
-          }}
-        >
-          {q.answers.map((a, i) => {
-            const isCorrect = i === q.correct;
-            const isChosen = i === selected;
-            let dynamicStyle = { ...answerButtonStyle };
-
-            if (showFeedback) {
-              if (isCorrect) {
-                dynamicStyle = {
-                  ...dynamicStyle,
-                  background: "linear-gradient(180deg, #dcfce7, #bbf7d0)",
-                  border: "1px solid #22c55e",
-                };
-              } else if (isChosen) {
-                dynamicStyle = {
-                  ...dynamicStyle,
-                  background: "linear-gradient(180deg, #fee2e2, #fecaca)",
-                  border: "1px solid #ef4444",
-                };
-              } else {
-                dynamicStyle = {
-                  ...dynamicStyle,
-                  opacity: 0.74,
-                };
-              }
-            }
-
-            return (
-              <button
-                key={i}
-                onClick={() => handleAnswer(i)}
-                style={dynamicStyle}
-                onMouseEnter={(e) => {
-                  if (!showFeedback) {
-                    e.currentTarget.style.transform = "translateY(-1px)";
-                    e.currentTarget.style.boxShadow =
-                      "0 14px 24px rgba(0,0,0,0.18)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow =
-                    dynamicStyle.boxShadow || "0 10px 20px rgba(0,0,0,0.15)";
-                }}
-                onMouseDown={(e) => {
-                  if (!showFeedback)
-                    e.currentTarget.style.transform = "scale(0.985)";
-                }}
-                onMouseUp={(e) => {
-                  if (!showFeedback)
-                    e.currentTarget.style.transform = "translateY(-1px)";
-                }}
-              >
-                {a}
-              </button>
-            );
-          })}
-        </div>
-
-        {showFeedback && (
-          <div
-            style={{
-              marginTop: "18px",
-              padding: "18px",
-              borderRadius: "18px",
-              background: "rgba(255,255,255,0.14)",
-              border: "1px solid rgba(255,255,255,0.16)",
-            }}
-          >
-            <h3 style={{ marginTop: 0, fontSize: "28px" }}>
-              {selected === q.correct ? t.goalText : t.saveText}
-            </h3>
-            <p style={{ marginBottom: "16px", opacity: 0.96 }}>{q.fact}</p>
-            <button
-              onClick={next}
-              style={{
-                padding: "14px 22px",
-                borderRadius: "14px",
-                border: "none",
-                cursor: "pointer",
-                fontWeight: 800,
-                background: "linear-gradient(180deg, #fef08a, #facc15)",
-                color: "#0f172a",
-                boxShadow: "0 14px 24px rgba(0,0,0,0.22)",
-              }}
-            >
-              {isLastQuestion ? t.finish : t.next}
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
