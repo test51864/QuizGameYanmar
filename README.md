@@ -1,2 +1,0 @@
-# QuizGameYanmar
-Created with CodeSandbox
