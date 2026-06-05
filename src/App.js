@@ -2,193 +2,82 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 
 const ROUND_TIME = 18;
-const QUESTIONS_PER_MATCH = 8;
 const LEADERBOARD_KEY = "yanmar_power_league_scores";
 const LEADS_KEY = "yanmar_power_league_leads";
 
 const questionBank = {
   en: [
     {
-      id: "en-origin",
-      category: "Brand",
-      level: 1,
-      question: "Where did Yanmar start?",
-      answers: ["Japan", "Brazil", "Canada"],
+      id: 1,
+      question: "Where does Yanmar come from?",
+      answers: ["Japan", "USA", "Germany"],
       correct: 0,
-      fact: "Yanmar started in Japan and still carries that engineering identity.",
+      fact: "Yanmar was founded in Japan.",
     },
     {
-      id: "en-generator",
-      category: "Power",
-      level: 1,
-      question: "Which Yanmar solution keeps work moving when site power is unavailable?",
-      answers: ["Generator", "Paint mixer", "Office printer"],
+      id: 2,
+      question: "No power on site?",
+      answers: ["Generator", "Tractor", "Boat"],
       correct: 0,
-      fact: "Generators provide temporary power for sites, events and remote work.",
+      fact: "Generators provide power when electricity is unavailable.",
     },
     {
-      id: "en-pump",
-      category: "Water",
-      level: 1,
-      question: "What is the main job of a pump?",
-      answers: ["Move water", "Measure wind", "Store fuel"],
-      correct: 0,
-      fact: "Pumps are used to move water quickly and reliably.",
+      id: 3,
+      question: "Compact tractor power?",
+      answers: ["10 hp", "25–50 hp", "200 hp"],
+      correct: 1,
+      fact: "Compact tractors balance size and power.",
     },
     {
-      id: "en-marine",
-      category: "Marine",
-      level: 2,
-      question: "Where would you normally use a Yanmar marine engine?",
-      answers: ["Boat", "Skateboard", "Elevator"],
+      id: 4,
+      question: "What does a pump do?",
+      answers: ["Move water", "Make energy", "Cool air"],
       correct: 0,
-      fact: "Marine engines are built for boats and demanding water conditions.",
+      fact: "Pumps move water in real situations.",
     },
     {
-      id: "en-compact",
-      category: "Land",
-      level: 2,
-      question: "Why are compact tractors useful on small and medium sites?",
-      answers: ["They combine size and strength", "They only drive indoors", "They replace safety gear"],
+      id: 5,
+      question: "Where is a Yanmar marine engine used?",
+      answers: ["Boat", "Car", "Train"],
       correct: 0,
-      fact: "Compact tractors are valued because they work in tighter spaces while still delivering useful power.",
-    },
-    {
-      id: "en-diesel",
-      category: "Engine",
-      level: 2,
-      question: "What is diesel engine design mainly known for?",
-      answers: ["Durable torque", "Silent magic", "No maintenance ever"],
-      correct: 0,
-      fact: "Diesel engines are often chosen for torque, reliability and heavy-duty use.",
-    },
-    {
-      id: "en-service",
-      category: "Support",
-      level: 3,
-      question: "What helps Yanmar equipment stay ready after delivery?",
-      answers: ["Service and parts support", "Guesswork", "Removing manuals"],
-      correct: 0,
-      fact: "Good service, parts and checks keep machines ready for the next job.",
-    },
-    {
-      id: "en-safety",
-      category: "Worksite",
-      level: 3,
-      question: "Before operating machinery, what should always come first?",
-      answers: ["Safety check", "Maximum speed", "Skipping instructions"],
-      correct: 0,
-      fact: "A quick safety check protects people, machines and the job itself.",
-    },
-    {
-      id: "en-application",
-      category: "Application",
-      level: 3,
-      question: "Which match makes the most sense for irrigation or drainage?",
-      answers: ["Pump", "Marine display", "Ticket scanner"],
-      correct: 0,
-      fact: "Pumps are practical for irrigation, drainage and water transfer jobs.",
-    },
-    {
-      id: "en-range",
-      category: "Range",
-      level: 3,
-      question: "Yanmar equipment is often connected to which work areas?",
-      answers: ["Land, water and power", "Fashion and music only", "Kitchen appliances only"],
-      correct: 0,
-      fact: "Yanmar is associated with solutions for land, water and power applications.",
+      fact: "Marine engines are used in boats.",
     },
   ],
   nl: [
     {
-      id: "nl-origin",
-      category: "Merk",
-      level: 1,
-      question: "Waar is Yanmar begonnen?",
-      answers: ["Japan", "Brazilie", "Canada"],
+      id: 1,
+      question: "Waar komt Yanmar vandaan?",
+      answers: ["Japan", "VS", "Duitsland"],
       correct: 0,
-      fact: "Yanmar begon in Japan en draagt die technische identiteit nog steeds mee.",
+      fact: "Yanmar is opgericht in Japan.",
     },
     {
-      id: "nl-generator",
-      category: "Power",
-      level: 1,
-      question: "Welke Yanmar-oplossing houdt werk draaiend zonder vaste stroom?",
-      answers: ["Generator", "Verfmenger", "Kantoorprinter"],
+      id: 2,
+      question: "Geen stroom op locatie?",
+      answers: ["Generator", "Tractor", "Boot"],
       correct: 0,
-      fact: "Generatoren leveren tijdelijke stroom voor locaties, events en werk op afstand.",
+      fact: "Generatoren leveren stroom als er geen elektriciteit is.",
     },
     {
-      id: "nl-pump",
-      category: "Water",
-      level: 1,
-      question: "Wat is de hoofdtaak van een pomp?",
-      answers: ["Water verplaatsen", "Wind meten", "Brandstof opslaan"],
-      correct: 0,
-      fact: "Pompen worden gebruikt om water snel en betrouwbaar te verplaatsen.",
+      id: 3,
+      question: "Hoeveel vermogen heeft een compacte tractor ongeveer?",
+      answers: ["10 pk", "25–50 pk", "200 pk"],
+      correct: 1,
+      fact: "Compacte tractors combineren formaat en kracht.",
     },
     {
-      id: "nl-marine",
-      category: "Marine",
-      level: 2,
-      question: "Waar gebruik je normaal een Yanmar marine engine?",
-      answers: ["Boot", "Skateboard", "Lift"],
+      id: 4,
+      question: "Wat doet een pomp?",
+      answers: ["Water verplaatsen", "Energie maken", "Lucht koelen"],
       correct: 0,
-      fact: "Marine engines zijn gemaakt voor boten en zware omstandigheden op het water.",
+      fact: "Pompen verplaatsen water in praktijksituaties.",
     },
     {
-      id: "nl-compact",
-      category: "Land",
-      level: 2,
-      question: "Waarom zijn compacte tractors handig op kleine en middelgrote locaties?",
-      answers: ["Ze combineren formaat en kracht", "Ze rijden alleen binnen", "Ze vervangen veiligheidsmiddelen"],
+      id: 5,
+      question: "Waar gebruik je een Yanmar marine engine?",
+      answers: ["Boot", "Auto", "Trein"],
       correct: 0,
-      fact: "Compacte tractors werken in krappe ruimtes en leveren toch bruikbaar vermogen.",
-    },
-    {
-      id: "nl-diesel",
-      category: "Motor",
-      level: 2,
-      question: "Waar staat dieselmotortechniek vooral om bekend?",
-      answers: ["Sterk koppel", "Stille magie", "Nooit onderhoud"],
-      correct: 0,
-      fact: "Dieselmotoren worden vaak gekozen voor koppel, betrouwbaarheid en zwaar werk.",
-    },
-    {
-      id: "nl-service",
-      category: "Support",
-      level: 3,
-      question: "Wat helpt Yanmar-machines klaar te houden na levering?",
-      answers: ["Service en onderdelen", "Gokken", "Handleidingen verwijderen"],
-      correct: 0,
-      fact: "Goede service, onderdelen en controles houden machines klaar voor de volgende klus.",
-    },
-    {
-      id: "nl-safety",
-      category: "Werkplek",
-      level: 3,
-      question: "Wat moet altijd eerst gebeuren voor je met machines werkt?",
-      answers: ["Veiligheidscheck", "Maximale snelheid", "Instructies overslaan"],
-      correct: 0,
-      fact: "Een korte veiligheidscheck beschermt mensen, machines en het werk zelf.",
-    },
-    {
-      id: "nl-application",
-      category: "Toepassing",
-      level: 3,
-      question: "Welke oplossing past het best bij irrigatie of drainage?",
-      answers: ["Pomp", "Marine display", "Ticket scanner"],
-      correct: 0,
-      fact: "Pompen zijn praktisch voor irrigatie, drainage en watertransport.",
-    },
-    {
-      id: "nl-range",
-      category: "Range",
-      level: 3,
-      question: "Met welke werkgebieden wordt Yanmar vaak verbonden?",
-      answers: ["Land, water en power", "Alleen mode en muziek", "Alleen keukenapparaten"],
-      correct: 0,
-      fact: "Yanmar wordt gekoppeld aan oplossingen voor land, water en power-toepassingen.",
+      fact: "Marine engines worden gebruikt in boten.",
     },
   ],
 };
@@ -200,7 +89,7 @@ const copy = {
     languageIntro: "Choose your language",
     teamIntro: "Pick your match team",
     readyTitle: "Match setup complete",
-    readyCopy: "Eight rapid rounds. Correct answers score goals, speed adds bonus points and a streak turns pressure into power.",
+    readyCopy: "Five original quiz rounds. Correct answers score goals, speed adds bonus points and a streak turns pressure into power.",
     start: "Start match",
     back: "Back",
     changeLanguage: "Language",
@@ -212,28 +101,27 @@ const copy = {
     time: "Time",
     powerPlay: "50/50 Power Play",
     powerUsed: "Power Play used",
-    level: "Level",
     goal: "Goal",
     saved: "Saved",
     timeout: "Time ran out",
     next: "Next round",
     finish: "Finish match",
     complete: "Full time",
-    resultPerfect: "Yanmar League Champion",
-    resultStrong: "Power League Pro",
-    resultGood: "Reliable Starter",
-    resultTry: "Training Ground Ready",
+    resultPerfect: "Perfect striker!",
+    resultStrong: "Strong performance!",
+    resultGood: "Nice effort!",
+    resultTry: "Training ground ready",
     correct: "Correct",
     bonus: "Bonus",
-    prizeTitle: "Enter the prize draw",
-    prizeText: "Leave your email address to save the score and join the draw.",
-    emailPlaceholder: "Email address",
+    prizeTitle: "Win an awesome prize",
+    prizeText: "Leave your email address below for a chance to win.",
+    emailPlaceholder: "Enter your email address",
     emailErrorEmpty: "Please enter your email address.",
     emailErrorInvalid: "Please enter a valid email address.",
-    prizeButton: "Save score",
-    thanks: "Score saved",
-    thanksSub: "You are in the local leaderboard and prize draw.",
-    playAgain: "Play again",
+    prizeButton: "Enter Prize Draw",
+    thanks: "You're in!",
+    thanksSub: "Thanks for joining the prize draw.",
+    playAgain: "Play Again",
     newGame: "New setup",
     leaderboard: "Leaderboard",
     noScores: "No saved scores yet.",
@@ -248,7 +136,7 @@ const copy = {
     languageIntro: "Kies je taal",
     teamIntro: "Kies je wedstrijdteam",
     readyTitle: "Wedstrijd staat klaar",
-    readyCopy: "Acht snelle rondes. Goede antwoorden scoren goals, snelheid geeft bonuspunten en een streak maakt druk om in power.",
+    readyCopy: "Vijf originele quizrondes. Goede antwoorden scoren goals, snelheid geeft bonuspunten en een streak maakt druk om in power.",
     start: "Start wedstrijd",
     back: "Terug",
     changeLanguage: "Taal",
@@ -260,27 +148,26 @@ const copy = {
     time: "Tijd",
     powerPlay: "50/50 Power Play",
     powerUsed: "Power Play gebruikt",
-    level: "Level",
     goal: "Goal",
     saved: "Gepakt",
     timeout: "Tijd voorbij",
     next: "Volgende ronde",
     finish: "Wedstrijd afronden",
     complete: "Full time",
-    resultPerfect: "Yanmar League Champion",
-    resultStrong: "Power League Pro",
-    resultGood: "Betrouwbare Starter",
+    resultPerfect: "Perfecte spits!",
+    resultStrong: "Sterke score!",
+    resultGood: "Netjes gedaan!",
     resultTry: "Training Ground Ready",
     correct: "Goed",
     bonus: "Bonus",
-    prizeTitle: "Doe mee aan de winactie",
-    prizeText: "Laat je e-mailadres achter om je score op te slaan en mee te doen.",
-    emailPlaceholder: "E-mailadres",
+    prizeTitle: "Win een te gekke prijs",
+    prizeText: "Laat hieronder je e-mailadres achter en maak kans om te winnen.",
+    emailPlaceholder: "Vul je e-mailadres in",
     emailErrorEmpty: "Vul je e-mailadres in.",
     emailErrorInvalid: "Vul een geldig e-mailadres in.",
-    prizeButton: "Score opslaan",
-    thanks: "Score opgeslagen",
-    thanksSub: "Je staat in de lokale leaderboard en doet mee aan de winactie.",
+    prizeButton: "Doe mee aan de winactie",
+    thanks: "Je doet mee!",
+    thanksSub: "Bedankt voor het meedoen aan de winactie.",
     playAgain: "Speel opnieuw",
     newGame: "Nieuwe setup",
     leaderboard: "Leaderboard",
@@ -313,6 +200,10 @@ const teams = {
   },
 };
 
+function getQuestions(language) {
+  return questionBank[language] || questionBank.en;
+}
+
 function readStoredList(key) {
   try {
     return JSON.parse(window.localStorage.getItem(key) || "[]");
@@ -325,19 +216,10 @@ function writeStoredList(key, value) {
   window.localStorage.setItem(key, JSON.stringify(value));
 }
 
-function pickQuestions(language) {
-  const source = questionBank[language] || questionBank.en;
-  return source
-    .map((question) => ({ question, sort: Math.random() }))
-    .sort((a, b) => a.sort - b.sort)
-    .slice(0, QUESTIONS_PER_MATCH)
-    .map(({ question }) => question);
-}
-
 function getResultLabel(t, correctCount, total) {
   if (correctCount === total) return t.resultPerfect;
-  if (correctCount >= Math.ceil(total * 0.75)) return t.resultStrong;
-  if (correctCount >= Math.ceil(total * 0.5)) return t.resultGood;
+  if (correctCount >= Math.ceil(total * 0.6)) return t.resultStrong;
+  if (correctCount > 0) return t.resultGood;
   return t.resultTry;
 }
 
@@ -470,7 +352,7 @@ export default function App() {
   const [language, setLanguage] = useState(null);
   const [team, setTeam] = useState(null);
   const [phase, setPhase] = useState("language");
-  const [questions, setQuestions] = useState(() => pickQuestions("en"));
+  const [questions, setQuestions] = useState(() => getQuestions("en"));
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [displayScore, setDisplayScore] = useState(0);
@@ -496,7 +378,7 @@ export default function App() {
   const accuracy = questions.length ? Math.round((correctCount / questions.length) * 100) : 0;
   const timerPercent = Math.max(0, Math.min(100, (timeLeft / ROUND_TIME) * 100));
   const progressPercent = questions.length ? ((current + (phase === "complete" ? 1 : 0)) / questions.length) * 100 : 0;
-  const resultLabel = getResultLabel(t, correctCount, questions.length || QUESTIONS_PER_MATCH);
+  const resultLabel = getResultLabel(t, correctCount, questions.length || getQuestions(lang).length);
 
   useEffect(() => {
     if (displayScore === score) return undefined;
@@ -536,7 +418,7 @@ export default function App() {
 
   function chooseLanguage(nextLanguage) {
     setLanguage(nextLanguage);
-    setQuestions(pickQuestions(nextLanguage));
+    setQuestions(getQuestions(nextLanguage));
     setTeam(null);
     setEmailSubmitted(false);
     setEmailError("");
@@ -549,7 +431,7 @@ export default function App() {
   }
 
   function startMatch() {
-    setQuestions(pickQuestions(lang));
+    setQuestions(getQuestions(lang));
     setScore(0);
     setDisplayScore(0);
     setStreak(0);
@@ -569,9 +451,9 @@ export default function App() {
     const correct = index === currentQuestion.correct;
     const nextStreak = correct ? streak + 1 : 0;
     const direction = index === 0 ? "left" : index === 2 ? "right" : "center";
-    const earned = correct ? 100 + timeLeft * 5 + nextStreak * 20 + currentQuestion.level * 15 : 0;
+    const earned = correct ? 100 + timeLeft * 5 + nextStreak * 20 : 0;
 
-    setSelected(index);
+    setSelected(timedOut ? -1 : index);
     setShotState(timedOut ? "timeout" : correct ? `goal-${direction}` : `save-${direction}`);
 
     window.setTimeout(() => {
@@ -621,7 +503,7 @@ export default function App() {
     setLanguage(null);
     setTeam(null);
     setPhase("language");
-    setQuestions(pickQuestions("en"));
+    setQuestions(getQuestions("en"));
     setScore(0);
     setDisplayScore(0);
     setStreak(0);
@@ -736,7 +618,7 @@ export default function App() {
               <h1>{t.readyTitle}</h1>
               <p>{t.readyCopy}</p>
               <div className="match-facts">
-                <span>{QUESTIONS_PER_MATCH} rounds</span>
+                <span>{questions.length} rounds</span>
                 <span>{ROUND_TIME}s timer</span>
                 <span>50/50</span>
               </div>
@@ -827,8 +709,8 @@ export default function App() {
         <div className="match-grid">
           <div className="question-zone">
             <div className="question-meta">
-              <span>{currentQuestion.category}</span>
-              <span>{t.level} {currentQuestion.level}</span>
+              <span>{t.round} {current + 1}</span>
+              <span>{questions.length} total</span>
             </div>
             <h1>{currentQuestion.question}</h1>
             <div className="timer-row">
