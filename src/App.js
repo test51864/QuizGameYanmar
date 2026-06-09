@@ -92,8 +92,11 @@ const copy = {
       "Score goals, test your Yanmar knowledge, and finish with a chance to win an awesome prize.",
     goals: "Goals",
     round: "Round",
-    goalText: "GOAL ⚽🔥",
-    saveText: "Saved by the keeper 🧤",
+    goalText: "GOAL!",
+    saveText: "SAVED!",
+    missText: "MISS!",
+    correctText: "Correct answer!",
+    wrongText: "Wrong answer!",
     next: "Next Round",
     finish: "Finish Match",
     complete: "Penalty Shootout Complete",
@@ -127,8 +130,11 @@ const copy = {
       "Scoor goals, test je Yanmar-kennis en maak daarna kans op een te gekke prijs.",
     goals: "Goals",
     round: "Ronde",
-    goalText: "GOAL ⚽🔥",
-    saveText: "Gepakt door de keeper 🧤",
+    goalText: "GOAL!",
+    saveText: "GEPAKT!",
+    missText: "MIS!",
+    correctText: "Goed antwoord!",
+    wrongText: "Fout antwoord!",
     next: "Volgende ronde",
     finish: "Wedstrijd afronden",
     complete: "Penalty Shootout klaar",
@@ -151,60 +157,792 @@ const copy = {
   },
 };
 
-function YanmarLogo() {
+function GlobalStyles() {
   return (
-    <div
-      style={{ display: "flex", justifyContent: "center", margin: "0 auto" }}
-    >
-      <div
-        style={{
-          color: "#e6002d",
-          fontWeight: 900,
-          fontStyle: "italic",
-          letterSpacing: "2px",
-          fontSize: "64px",
-          lineHeight: 1,
-          textTransform: "uppercase",
-          textShadow: "0 6px 16px rgba(0,0,0,0.18)",
-        }}
-      >
-        YANMAR
-      </div>
-    </div>
+    <style>{`
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #0f172a;
+      }
+
+      button, input {
+        font-family: inherit;
+      }
+
+      .app-shell {
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at top, #38bdf8 0%, #0f172a 38%, #166534 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        padding: 24px;
+      }
+
+      .main-card {
+        width: 100%;
+        max-width: 980px;
+        padding: 30px;
+        border-radius: 28px;
+        background: rgba(255,255,255,0.12);
+        backdrop-filter: blur(14px);
+        box-shadow: 0 24px 50px rgba(0,0,0,0.35);
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.16);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+
+      .main-card.fading {
+        opacity: 0.75;
+        transform: scale(0.995);
+      }
+
+      .yanmar-logo {
+        display: flex;
+        justify-content: center;
+        margin: 0 auto;
+        color: #e6002d;
+        font-weight: 900;
+        font-style: italic;
+        letter-spacing: 2px;
+        font-size: 64px;
+        line-height: 1;
+        text-transform: uppercase;
+        text-shadow: 0 6px 16px rgba(0,0,0,0.18);
+      }
+
+      .glass-button {
+        padding: 14px 22px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.25);
+        background: rgba(255,255,255,0.08);
+        color: white;
+        cursor: pointer;
+        font-weight: 700;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.16);
+      }
+
+      .glass-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 24px rgba(0,0,0,0.2);
+      }
+
+      .start-button,
+      .prize-button {
+        padding: 16px 26px;
+        border-radius: 16px;
+        border: none;
+        font-weight: 800;
+        font-size: 16px;
+        cursor: pointer;
+        background: linear-gradient(180deg, #fef08a, #facc15);
+        color: #0f172a;
+        box-shadow: 0 14px 24px rgba(0,0,0,0.25);
+        transition: transform 0.15s ease;
+      }
+
+      .start-button:active,
+      .prize-button:active {
+        transform: scale(0.98);
+      }
+
+      .select-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 20px;
+        max-width: 720px;
+        margin: 0 auto 24px auto;
+      }
+
+      .select-card {
+        width: 100%;
+        padding: 16px;
+        border-radius: 26px;
+        border: 1px solid rgba(255,255,255,0.18);
+        background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+        color: white;
+        cursor: pointer;
+        box-shadow: 0 18px 36px rgba(0,0,0,0.22);
+        backdrop-filter: blur(10px);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .select-card:hover {
+        transform: translateY(-2px) scale(1.01);
+        box-shadow: 0 24px 42px rgba(0,0,0,0.26);
+      }
+
+      .select-visual {
+        width: 100%;
+        height: 140px;
+        border-radius: 18px;
+        margin-bottom: 16px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+      }
+
+      .select-title {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+      }
+
+      .top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+        margin-bottom: 18px;
+      }
+
+      .pill {
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-weight: 700;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+        background: rgba(255,255,255,0.14);
+      }
+
+      .score-pill.bump {
+        transform: scale(1.06);
+        box-shadow: 0 0 0 8px rgba(250,204,21,0.12);
+      }
+
+      .question-title {
+        font-size: 34px;
+        margin-bottom: 18px;
+      }
+
+      .arena {
+        margin: 20px auto;
+        width: 100%;
+        height: 330px;
+        border-radius: 26px;
+        background:
+          linear-gradient(180deg, #93c5fd 0%, #86efac 30%, #166534 100%);
+        position: relative;
+        overflow: hidden;
+        box-shadow:
+          inset 0 18px 30px rgba(255,255,255,0.18),
+          inset 0 -14px 22px rgba(0,0,0,0.18);
+      }
+
+      .stadium {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 76px;
+        background: linear-gradient(180deg, #0f172a, #1e293b);
+      }
+
+      .goal {
+        position: absolute;
+        top: 32px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 270px;
+        height: 130px;
+        border: 7px solid white;
+        border-bottom: none;
+        border-radius: 18px 18px 0 0;
+        background:
+          repeating-linear-gradient(90deg, rgba(255,255,255,0.28) 0 10px, rgba(255,255,255,0.07) 10px 20px),
+          repeating-linear-gradient(0deg, rgba(255,255,255,0.15) 0 10px, transparent 10px 20px);
+        box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+        z-index: 2;
+      }
+
+      .goal.shake {
+        animation: netShake 0.55s ease 0.72s both;
+        box-shadow: 0 0 28px rgba(255,255,255,0.4);
+      }
+
+      .goal-line {
+        position: absolute;
+        top: 162px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 290px;
+        height: 6px;
+        background: white;
+        border-radius: 999px;
+        z-index: 3;
+      }
+
+      .result-banner {
+        position: absolute;
+        top: 86px;
+        left: 50%;
+        transform: translateX(-50%) scale(0.7);
+        opacity: 0;
+        z-index: 30;
+        padding: 12px 22px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.98);
+        color: #0f172a;
+        font-size: 38px;
+        font-weight: 1000;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        box-shadow: 0 12px 26px rgba(0,0,0,0.25);
+        pointer-events: none;
+        white-space: nowrap;
+      }
+
+      .result-banner.show {
+        animation: bannerPop 0.42s ease forwards;
+      }
+
+      .result-banner.goal {
+        color: #16a34a;
+      }
+
+      .result-banner.save,
+      .result-banner.miss {
+        color: #dc2626;
+      }
+
+      .keeper {
+        position: absolute;
+        top: 138px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 78px;
+        height: 88px;
+        z-index: 15;
+        transition: transform 0.45s ease;
+      }
+
+      .keeper-head {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #f2c9a5;
+        margin: 0 auto -2px;
+        border: 3px solid #0f172a;
+      }
+
+      .keeper-body {
+        width: 54px;
+        height: 48px;
+        background: #2563eb;
+        border: 4px solid #0f172a;
+        border-radius: 14px;
+        margin: 0 auto;
+        position: relative;
+      }
+
+      .keeper-body:before,
+      .keeper-body:after {
+        content: "";
+        position: absolute;
+        top: 8px;
+        width: 36px;
+        height: 11px;
+        background: #2563eb;
+        border: 3px solid #0f172a;
+        border-radius: 999px;
+      }
+
+      .keeper-body:before {
+        left: -36px;
+        transform: rotate(-22deg);
+      }
+
+      .keeper-body:after {
+        right: -36px;
+        transform: rotate(22deg);
+      }
+
+      .keeper-legs {
+        width: 60px;
+        height: 26px;
+        margin: 0 auto;
+        position: relative;
+      }
+
+      .keeper-legs:before,
+      .keeper-legs:after {
+        content: "";
+        position: absolute;
+        top: -2px;
+        width: 12px;
+        height: 30px;
+        background: #0f172a;
+        border-radius: 999px;
+      }
+
+      .keeper-legs:before {
+        left: 14px;
+        transform: rotate(14deg);
+      }
+
+      .keeper-legs:after {
+        right: 14px;
+        transform: rotate(-14deg);
+      }
+
+      .keeper.goal {
+        transform: translateX(-145%) rotate(-32deg);
+      }
+
+      .keeper.save {
+        transform: translateX(-50%) translateY(-22px) scale(1.14);
+      }
+
+      .keeper.miss {
+        transform: translateX(-140%) rotate(-28deg);
+      }
+
+      .ball {
+        position: absolute;
+        left: 50%;
+        bottom: 34px;
+        width: 48px;
+        height: 48px;
+        margin-left: -24px;
+        border-radius: 50%;
+        background:
+          radial-gradient(circle at 35% 32%, #ffffff 0 24%, transparent 25%),
+          radial-gradient(circle at 62% 62%, #0f172a 0 16%, transparent 17%),
+          radial-gradient(circle at 30% 72%, #0f172a 0 12%, transparent 13%),
+          white;
+        border: 4px solid #0f172a;
+        z-index: 22;
+        box-shadow: 0 10px 18px rgba(0,0,0,0.28);
+      }
+
+      .ball.goal {
+        animation: ballGoal 1.05s cubic-bezier(.2,.7,.2,1) forwards;
+      }
+
+      .ball.save {
+        animation: ballSave 1.05s cubic-bezier(.2,.7,.2,1) forwards;
+      }
+
+      .ball.miss {
+        animation: ballMiss 1.05s cubic-bezier(.2,.7,.2,1) forwards;
+      }
+
+      .shot-line {
+        position: absolute;
+        left: 50%;
+        bottom: 58px;
+        width: 5px;
+        height: 0;
+        background: rgba(255,255,255,0.75);
+        transform-origin: bottom;
+        z-index: 10;
+        opacity: 0;
+        border-radius: 999px;
+      }
+
+      .shot-line.goal {
+        height: 218px;
+        transform: rotate(24deg);
+        animation: lineShow 0.45s ease forwards;
+      }
+
+      .shot-line.save {
+        height: 132px;
+        transform: rotate(0deg);
+        animation: lineShow 0.45s ease forwards;
+      }
+
+      .shot-line.miss {
+        height: 255px;
+        transform: rotate(48deg);
+        animation: lineShow 0.45s ease forwards;
+      }
+
+      .confetti {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        display: none;
+        z-index: 35;
+      }
+
+      .confetti.show {
+        display: block;
+      }
+
+      .confetti span {
+        position: absolute;
+        top: -20px;
+        width: 10px;
+        height: 18px;
+        background: #facc15;
+        animation: confettiFall 1.2s ease forwards;
+      }
+
+      .confetti span:nth-child(1) { left: 12%; animation-delay: 0.05s; background: #facc15; }
+      .confetti span:nth-child(2) { left: 24%; animation-delay: 0.12s; background: #22c55e; }
+      .confetti span:nth-child(3) { left: 37%; animation-delay: 0.02s; background: #ffffff; }
+      .confetti span:nth-child(4) { left: 51%; animation-delay: 0.16s; background: #ef4444; }
+      .confetti span:nth-child(5) { left: 63%; animation-delay: 0.08s; background: #facc15; }
+      .confetti span:nth-child(6) { left: 76%; animation-delay: 0.18s; background: #22c55e; }
+      .confetti span:nth-child(7) { left: 88%; animation-delay: 0.10s; background: #ffffff; }
+
+      .answer-grid {
+        display: grid;
+        gap: 12px;
+        max-width: 720px;
+        margin: 0 auto;
+      }
+
+      .answer-button {
+        display: block;
+        width: 100%;
+        margin: 0 auto;
+        padding: 15px 18px;
+        border-radius: 16px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.88));
+        color: #0f172a;
+        font-weight: 800;
+        font-size: 16px;
+        cursor: pointer;
+        border: 2px solid rgba(255,255,255,0.6);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease, border-color 0.15s ease;
+      }
+
+      .answer-button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 24px rgba(0,0,0,0.2);
+      }
+
+      .answer-button:disabled {
+        cursor: not-allowed;
+      }
+
+      .answer-button.correct {
+        background: linear-gradient(180deg, #dcfce7, #bbf7d0);
+        border-color: #22c55e;
+        color: #14532d;
+      }
+
+      .answer-button.wrong {
+        background: linear-gradient(180deg, #fee2e2, #fecaca);
+        border-color: #ef4444;
+        color: #7f1d1d;
+      }
+
+      .feedback-box {
+        margin: 18px auto 0 auto;
+        padding: 14px 16px;
+        border-radius: 18px;
+        max-width: 720px;
+        background: rgba(255,255,255,0.13);
+        border: 1px solid rgba(255,255,255,0.17);
+      }
+
+      .feedback-title {
+        font-size: 21px;
+        font-weight: 900;
+        margin-bottom: 6px;
+      }
+
+      .feedback-title.goal {
+        color: #bbf7d0;
+      }
+
+      .feedback-title.save,
+      .feedback-title.miss {
+        color: #fecaca;
+      }
+
+      .next-button {
+        margin-top: 16px;
+        padding: 14px 22px;
+        border-radius: 16px;
+        border: none;
+        cursor: pointer;
+        font-weight: 900;
+        font-size: 16px;
+        background: linear-gradient(180deg, #fef08a, #facc15);
+        color: #0f172a;
+        box-shadow: 0 14px 24px rgba(0,0,0,0.25);
+      }
+
+      .email-input {
+        width: 100%;
+        padding: 16px 18px;
+        border-radius: 16px;
+        border: 1px solid rgba(255,255,255,0.35);
+        outline: none;
+        font-size: 16px;
+        background: rgba(255,255,255,0.96);
+        color: #0f172a;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+      }
+
+      .result-label {
+        display: inline-block;
+        margin-top: 6px;
+        padding: 10px 16px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.18);
+        font-weight: 800;
+        letter-spacing: 0.2px;
+      }
+
+      @keyframes bannerPop {
+        0% {
+          opacity: 0;
+          transform: translateX(-50%) scale(0.7);
+        }
+        70% {
+          opacity: 1;
+          transform: translateX(-50%) scale(1.08);
+        }
+        100% {
+          opacity: 1;
+          transform: translateX(-50%) scale(1);
+        }
+      }
+
+      @keyframes ballGoal {
+        0% {
+          left: 50%;
+          bottom: 34px;
+          transform: scale(1) rotate(0deg);
+        }
+        65% {
+          left: 64%;
+          bottom: 198px;
+          transform: scale(0.78) rotate(540deg);
+        }
+        100% {
+          left: 69%;
+          bottom: 245px;
+          transform: scale(0.56) rotate(920deg);
+        }
+      }
+
+      @keyframes ballSave {
+        0% {
+          left: 50%;
+          bottom: 34px;
+          transform: scale(1) rotate(0deg);
+        }
+        72% {
+          left: 50%;
+          bottom: 164px;
+          transform: scale(0.82) rotate(520deg);
+        }
+        100% {
+          left: 50%;
+          bottom: 150px;
+          transform: scale(0.82) rotate(580deg);
+        }
+      }
+
+      @keyframes ballMiss {
+        0% {
+          left: 50%;
+          bottom: 34px;
+          transform: scale(1) rotate(0deg);
+        }
+        70% {
+          left: 90%;
+          bottom: 210px;
+          transform: scale(0.75) rotate(560deg);
+        }
+        100% {
+          left: 109%;
+          bottom: 255px;
+          transform: scale(0.62) rotate(920deg);
+        }
+      }
+
+      @keyframes netShake {
+        0%, 100% {
+          transform: translateX(-50%);
+        }
+        20% {
+          transform: translateX(calc(-50% - 8px));
+        }
+        40% {
+          transform: translateX(calc(-50% + 8px));
+        }
+        60% {
+          transform: translateX(calc(-50% - 5px));
+        }
+        80% {
+          transform: translateX(calc(-50% + 5px));
+        }
+      }
+
+      @keyframes lineShow {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 0.55;
+        }
+      }
+
+      @keyframes confettiFall {
+        0% {
+          transform: translateY(0) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(330px) rotate(420deg);
+          opacity: 0;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .app-shell {
+          padding: 10px;
+          align-items: flex-start;
+        }
+
+        .main-card {
+          padding: 18px;
+          border-radius: 22px;
+        }
+
+        .yanmar-logo {
+          font-size: 44px;
+        }
+
+        .main-card h1 {
+          font-size: 34px !important;
+        }
+
+        .question-title {
+          font-size: 26px;
+          line-height: 1.15;
+        }
+
+        .top-row {
+          justify-content: center;
+        }
+
+        .pill {
+          font-size: 14px;
+        }
+
+        .arena {
+          height: 310px;
+          border-radius: 20px;
+        }
+
+        .goal {
+          width: 230px;
+          height: 118px;
+          top: 32px;
+        }
+
+        .goal-line {
+          top: 150px;
+          width: 246px;
+        }
+
+        .keeper {
+          top: 126px;
+          width: 68px;
+          height: 80px;
+        }
+
+        .ball {
+          width: 54px;
+          height: 54px;
+          margin-left: -27px;
+          bottom: 26px;
+        }
+
+        .result-banner {
+          top: 78px;
+          font-size: 31px;
+          padding: 10px 18px;
+        }
+
+        .answer-button {
+          font-size: 15px;
+          padding: 14px 15px;
+        }
+
+        @keyframes ballGoal {
+          0% {
+            left: 50%;
+            bottom: 26px;
+            transform: scale(1) rotate(0deg);
+          }
+          65% {
+            left: 63%;
+            bottom: 175px;
+            transform: scale(0.78) rotate(540deg);
+          }
+          100% {
+            left: 68%;
+            bottom: 215px;
+            transform: scale(0.56) rotate(920deg);
+          }
+        }
+
+        @keyframes ballSave {
+          0% {
+            left: 50%;
+            bottom: 26px;
+            transform: scale(1) rotate(0deg);
+          }
+          72% {
+            left: 50%;
+            bottom: 142px;
+            transform: scale(0.82) rotate(520deg);
+          }
+          100% {
+            left: 50%;
+            bottom: 130px;
+            transform: scale(0.82) rotate(580deg);
+          }
+        }
+
+        @keyframes ballMiss {
+          0% {
+            left: 50%;
+            bottom: 26px;
+            transform: scale(1) rotate(0deg);
+          }
+          70% {
+            left: 91%;
+            bottom: 185px;
+            transform: scale(0.75) rotate(560deg);
+          }
+          100% {
+            left: 112%;
+            bottom: 228px;
+            transform: scale(0.62) rotate(920deg);
+          }
+        }
+      }
+    `}</style>
   );
+}
+
+function YanmarLogo() {
+  return <div className="yanmar-logo">YANMAR</div>;
 }
 
 function GlassButton({ children, onClick, style = {} }) {
   return (
-    <button
-      onClick={onClick}
-      style={{
-        padding: "14px 22px",
-        borderRadius: "14px",
-        border: "1px solid rgba(255,255,255,0.25)",
-        background: "rgba(255,255,255,0.08)",
-        color: "white",
-        cursor: "pointer",
-        fontWeight: 700,
-        transition: "transform 0.15s ease, box-shadow 0.15s ease",
-        boxShadow: "0 10px 20px rgba(0,0,0,0.16)",
-        ...style,
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-1px)";
-        e.currentTarget.style.boxShadow = "0 16px 24px rgba(0,0,0,0.2)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-        e.currentTarget.style.boxShadow = "0 10px 20px rgba(0,0,0,0.16)";
-      }}
-      onMouseDown={(e) => {
-        e.currentTarget.style.transform = "scale(0.98)";
-      }}
-      onMouseUp={(e) => {
-        e.currentTarget.style.transform = "translateY(-1px)";
-      }}
-    >
+    <button className="glass-button" onClick={onClick} style={style}>
       {children}
     </button>
   );
@@ -212,46 +950,9 @@ function GlassButton({ children, onClick, style = {} }) {
 
 function SelectCard({ onClick, title, children }) {
   return (
-    <button
-      onClick={onClick}
-      style={{
-        width: "100%",
-        padding: "16px",
-        borderRadius: "26px",
-        border: "1px solid rgba(255,255,255,0.18)",
-        background:
-          "linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06))",
-        color: "white",
-        cursor: "pointer",
-        boxShadow: "0 18px 36px rgba(0,0,0,0.22)",
-        backdropFilter: "blur(10px)",
-        transition: "transform 0.2s ease, box-shadow 0.2s ease",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-2px) scale(1.01)";
-        e.currentTarget.style.boxShadow = "0 24px 42px rgba(0,0,0,0.26)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0) scale(1)";
-        e.currentTarget.style.boxShadow = "0 18px 36px rgba(0,0,0,0.22)";
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          height: "140px",
-          borderRadius: "18px",
-          marginBottom: "16px",
-          overflow: "hidden",
-          position: "relative",
-          boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.18)",
-        }}
-      >
-        {children}
-      </div>
-      <div style={{ fontSize: "22px", fontWeight: 800, letterSpacing: 0.2 }}>
-        {title}
-      </div>
+    <button className="select-card" onClick={onClick}>
+      <div className="select-visual">{children}</div>
+      <div className="select-title">{title}</div>
     </button>
   );
 }
@@ -285,7 +986,6 @@ function UKFlag() {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%) rotate(35deg)",
-          transformOrigin: "center",
         }}
       />
       <div
@@ -297,7 +997,6 @@ function UKFlag() {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%) rotate(-35deg)",
-          transformOrigin: "center",
         }}
       />
       <div
@@ -309,7 +1008,6 @@ function UKFlag() {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%) rotate(35deg)",
-          transformOrigin: "center",
         }}
       />
       <div
@@ -321,7 +1019,6 @@ function UKFlag() {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%) rotate(-35deg)",
-          transformOrigin: "center",
         }}
       />
       <div
@@ -377,20 +1074,63 @@ function ResultLabel({ score, total, t }) {
   if (score === total) text = t.perfect;
   else if (score >= Math.ceil(total * 0.6)) text = t.solid;
 
+  return <div className="result-label">{text}</div>;
+}
+
+function PenaltyArena({ shotState, shotKey, t }) {
+  const isGoal = shotState === "goal";
+  const isSave = shotState === "save";
+  const isMiss = shotState === "miss";
+  const active = shotState !== "idle";
+
+  const bannerText = isGoal
+    ? t.goalText
+    : isSave
+    ? t.saveText
+    : isMiss
+    ? t.missText
+    : "";
+
   return (
-    <div
-      style={{
-        display: "inline-block",
-        marginTop: "6px",
-        padding: "10px 16px",
-        borderRadius: "999px",
-        background: "rgba(255,255,255,0.12)",
-        border: "1px solid rgba(255,255,255,0.18)",
-        fontWeight: 800,
-        letterSpacing: 0.2,
-      }}
-    >
-      {text}
+    <div className="arena">
+      <div className="stadium" />
+
+      <div className={isGoal ? "goal shake" : "goal"} />
+      <div className="goal-line" />
+
+      <div
+        className={`result-banner ${active ? "show" : ""} ${
+          active ? shotState : ""
+        }`}
+      >
+        {bannerText}
+      </div>
+
+      <div className={`confetti ${isGoal ? "show" : ""}`}>
+        <span />
+        <span />
+        <span />
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
+
+      <div className={`keeper ${active ? shotState : ""}`}>
+        <div className="keeper-head" />
+        <div className="keeper-body" />
+        <div className="keeper-legs" />
+      </div>
+
+      <div
+        key={`line-${shotKey}`}
+        className={`shot-line ${active ? shotState : ""}`}
+      />
+
+      <div
+        key={`ball-${shotKey}`}
+        className={`ball ${active ? shotState : ""}`}
+      />
     </div>
   );
 }
@@ -405,6 +1145,7 @@ export default function App() {
   const [selected, setSelected] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [shotState, setShotState] = useState("idle");
+  const [shotKey, setShotKey] = useState(0);
   const [screenFading, setScreenFading] = useState(false);
   const [email, setEmail] = useState("");
   const [emailSubmitted, setEmailSubmitted] = useState(false);
@@ -418,56 +1159,13 @@ export default function App() {
 
   useEffect(() => {
     if (displayScore === score) return;
+
     const timeout = setTimeout(() => {
       setDisplayScore((prev) => (prev < score ? prev + 1 : score));
     }, 140);
+
     return () => clearTimeout(timeout);
   }, [displayScore, score]);
-
-  const containerStyle = {
-    minHeight: "100vh",
-    background:
-      "radial-gradient(circle at top, #38bdf8 0%, #0f172a 38%, #166534 100%)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    fontFamily: "Arial, sans-serif",
-    color: "white",
-    padding: "24px",
-  };
-
-  const cardStyle = {
-    width: "100%",
-    maxWidth: "980px",
-    padding: "30px",
-    borderRadius: "28px",
-    background: "rgba(255,255,255,0.12)",
-    backdropFilter: "blur(14px)",
-    boxShadow: "0 24px 50px rgba(0,0,0,0.35)",
-    textAlign: "center",
-    border: "1px solid rgba(255,255,255,0.16)",
-    opacity: screenFading ? 0.75 : 1,
-    transform: screenFading ? "scale(0.995)" : "scale(1)",
-    transition: "opacity 0.2s ease, transform 0.2s ease",
-  };
-
-  const answerButtonStyle = {
-    display: "block",
-    width: "100%",
-    margin: "10px auto",
-    padding: "14px 18px",
-    borderRadius: "16px",
-    background:
-      "linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.88))",
-    color: "#0f172a",
-    fontWeight: 700,
-    fontSize: "16px",
-    cursor: "pointer",
-    border: "1px solid rgba(255,255,255,0.6)",
-    boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
-    transition:
-      "transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease",
-  };
 
   function resetGameState() {
     setStarted(false);
@@ -477,6 +1175,7 @@ export default function App() {
     setSelected(null);
     setShowFeedback(false);
     setShotState("idle");
+    setShotKey((k) => k + 1);
     setEmail("");
     setEmailSubmitted(false);
     setEmailError("");
@@ -507,6 +1206,7 @@ export default function App() {
       setSelected(null);
       setShowFeedback(false);
       setShotState("idle");
+      setShotKey((k) => k + 1);
       setEmail("");
       setEmailSubmitted(false);
       setEmailError("");
@@ -516,10 +1216,21 @@ export default function App() {
   }
 
   function handleAnswer(index) {
-    if (showFeedback) return;
+    if (showFeedback || selected !== null) return;
+
     setSelected(index);
+
     const correct = index === q.correct;
-    setShotState(correct ? "goal" : "save");
+
+    setShotKey((k) => k + 1);
+
+    if (correct) {
+      setShotState("goal");
+    } else {
+      const wrongOutcome = current % 2 === 0 ? "save" : "miss";
+      setShotState(wrongOutcome);
+    }
+
     setTimeout(() => {
       if (correct) setScore((s) => s + 1);
       setShowFeedback(true);
@@ -531,11 +1242,13 @@ export default function App() {
       animateScreenChange(() => setCurrent((c) => c + 1));
       return;
     }
+
     animateScreenChange(() => {
       setCurrent((c) => c + 1);
       setSelected(null);
       setShowFeedback(false);
       setShotState("idle");
+      setShotKey((k) => k + 1);
     });
   }
 
@@ -547,6 +1260,7 @@ export default function App() {
       setSelected(null);
       setShowFeedback(false);
       setShotState("idle");
+      setShotKey((k) => k + 1);
       setEmail("");
       setEmailSubmitted(false);
       setEmailError("");
@@ -561,6 +1275,7 @@ export default function App() {
       setEmailError(t.emailError1);
       return;
     }
+
     if (!valid) {
       setEmailError(t.emailError2);
       return;
@@ -584,14 +1299,21 @@ export default function App() {
     setEmailSubmitted(true);
   }
 
-  if (!language) {
+  function getAnswerClass(index) {
+    if (!showFeedback && selected !== index) return "";
+
+    if (showFeedback && index === q.correct) return "correct";
+    if (showFeedback && selected === index && index !== q.correct) return "wrong";
+
+    return "";
+  }
+
+  function renderLanguageScreen() {
     return (
-      <div style={containerStyle}>
-        <div style={cardStyle}>
+      <div className="app-shell">
+        <div className={`main-card ${screenFading ? "fading" : ""}`}>
           <YanmarLogo />
-          <h1
-            style={{ fontSize: "46px", marginBottom: "8px", marginTop: "18px" }}
-          >
+          <h1 style={{ fontSize: "46px", marginBottom: "8px", marginTop: "18px" }}>
             {copy.en.title}
           </h1>
           <p
@@ -604,23 +1326,16 @@ export default function App() {
           >
             {copy.en.languageIntro}
           </p>
-          <div
-            style={{ fontSize: "24px", fontWeight: 800, marginBottom: "18px" }}
-          >
+
+          <div style={{ fontSize: "24px", fontWeight: 800, marginBottom: "18px" }}>
             {copy.en.chooseLanguage}
           </div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-              gap: "20px",
-              maxWidth: "720px",
-              margin: "0 auto",
-            }}
-          >
+
+          <div className="select-grid">
             <SelectCard onClick={() => chooseLanguage("nl")} title="Nederlands">
               <NLFlag />
             </SelectCard>
+
             <SelectCard onClick={() => chooseLanguage("en")} title="English">
               <UKFlag />
             </SelectCard>
@@ -630,16 +1345,15 @@ export default function App() {
     );
   }
 
-  if (!team) {
+  function renderTeamScreen() {
     return (
-      <div style={containerStyle}>
-        <div style={cardStyle}>
+      <div className="app-shell">
+        <div className={`main-card ${screenFading ? "fading" : ""}`}>
           <YanmarLogo />
-          <h1
-            style={{ fontSize: "46px", marginBottom: "8px", marginTop: "18px" }}
-          >
+          <h1 style={{ fontSize: "46px", marginBottom: "8px", marginTop: "18px" }}>
             {t.title}
           </h1>
+
           <p
             style={{
               fontSize: "18px",
@@ -650,20 +1364,12 @@ export default function App() {
           >
             {t.teamIntro}
           </p>
-          <div
-            style={{ fontSize: "24px", fontWeight: 800, marginBottom: "18px" }}
-          >
+
+          <div style={{ fontSize: "24px", fontWeight: 800, marginBottom: "18px" }}>
             {t.chooseTeam}
           </div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-              gap: "20px",
-              maxWidth: "720px",
-              margin: "0 auto 24px auto",
-            }}
-          >
+
+          <div className="select-grid">
             <SelectCard
               onClick={() => chooseTeam("netherlands")}
               title={t.teamNetherlands}
@@ -682,6 +1388,7 @@ export default function App() {
                 🇳🇱
               </div>
             </SelectCard>
+
             <SelectCard onClick={() => chooseTeam("japan")} title={t.teamJapan}>
               <div
                 style={{
@@ -698,35 +1405,34 @@ export default function App() {
               </div>
             </SelectCard>
           </div>
+
           <GlassButton onClick={() => setLanguage(null)}>{t.back}</GlassButton>
         </div>
       </div>
     );
   }
 
-  if (!started) {
+  function renderStartScreen() {
     return (
-      <div style={containerStyle}>
-        <div style={cardStyle}>
+      <div className="app-shell">
+        <div className={`main-card ${screenFading ? "fading" : ""}`}>
           <YanmarLogo />
+
           <div
+            className="pill"
             style={{
               display: "inline-block",
-              padding: "10px 16px",
-              borderRadius: "999px",
               background: team === "netherlands" ? "#ff8c00" : "#0f2747",
               marginTop: "18px",
-              fontWeight: 800,
-              boxShadow: "0 12px 24px rgba(0,0,0,0.18)",
             }}
           >
             {team === "netherlands" ? "🇳🇱 Team Netherlands" : "🇯🇵 Team Japan"}
           </div>
-          <h1
-            style={{ fontSize: "46px", marginBottom: "8px", marginTop: "18px" }}
-          >
+
+          <h1 style={{ fontSize: "46px", marginBottom: "8px", marginTop: "18px" }}>
             {t.title}
           </h1>
+
           <p
             style={{
               fontSize: "18px",
@@ -737,32 +1443,11 @@ export default function App() {
           >
             {t.intro}
           </p>
-          <button
-            onClick={() => setStarted(true)}
-            style={{
-              padding: "16px 26px",
-              borderRadius: "16px",
-              border: "none",
-              fontWeight: 800,
-              fontSize: "16px",
-              cursor: "pointer",
-              background: "linear-gradient(180deg, #fef08a, #facc15)",
-              color: "#0f172a",
-              boxShadow: "0 14px 24px rgba(0,0,0,0.25)",
-              transition: "transform 0.15s ease",
-            }}
-            onMouseDown={(e) => {
-              e.currentTarget.style.transform = "scale(0.98)";
-            }}
-            onMouseUp={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-            }}
-          >
+
+          <button className="start-button" onClick={() => setStarted(true)}>
             {t.start}
           </button>
+
           <div
             style={{
               marginTop: "18px",
@@ -775,20 +1460,20 @@ export default function App() {
             <GlassButton onClick={() => setLanguage(null)}>
               {t.changeLanguage}
             </GlassButton>
-            <GlassButton onClick={() => setTeam(null)}>
-              {t.changeTeam}
-            </GlassButton>
+
+            <GlassButton onClick={() => setTeam(null)}>{t.changeTeam}</GlassButton>
           </div>
         </div>
       </div>
     );
   }
 
-  if (current >= questions.length) {
+  function renderFinalScreen() {
     return (
-      <div style={containerStyle}>
-        <div style={cardStyle}>
+      <div className="app-shell">
+        <div className={`main-card ${screenFading ? "fading" : ""}`}>
           <YanmarLogo />
+
           <div
             style={{
               fontSize: "80px",
@@ -798,9 +1483,11 @@ export default function App() {
           >
             🏆
           </div>
+
           <h1 style={{ fontSize: "42px", marginBottom: "6px" }}>
             {t.complete}
           </h1>
+
           <h2
             style={{
               marginTop: 0,
@@ -836,27 +1523,19 @@ export default function App() {
               >
                 {t.prizeTitle}
               </div>
+
               <p style={{ opacity: 0.96, marginBottom: "16px" }}>
                 {t.prizeText}
               </p>
+
               <input
+                className="email-input"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t.emailPlaceholder}
-                style={{
-                  width: "100%",
-                  padding: "16px 18px",
-                  borderRadius: "16px",
-                  border: "1px solid rgba(255,255,255,0.35)",
-                  outline: "none",
-                  fontSize: "16px",
-                  boxSizing: "border-box",
-                  background: "rgba(255,255,255,0.96)",
-                  color: "#0f172a",
-                  boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
-                }}
               />
+
               {emailError ? (
                 <div
                   style={{
@@ -868,21 +1547,11 @@ export default function App() {
                   {emailError}
                 </div>
               ) : null}
+
               <button
+                className="prize-button"
                 onClick={submitEmail}
-                style={{
-                  marginTop: "16px",
-                  width: "100%",
-                  padding: "16px 18px",
-                  borderRadius: "16px",
-                  border: "none",
-                  cursor: "pointer",
-                  fontWeight: 800,
-                  fontSize: "16px",
-                  background: "linear-gradient(180deg, #fef08a, #facc15)",
-                  color: "#0f172a",
-                  boxShadow: "0 14px 24px rgba(0,0,0,0.25)",
-                }}
+                style={{ marginTop: "16px", width: "100%" }}
               >
                 {t.prizeBtn}
               </button>
@@ -890,7 +1559,11 @@ export default function App() {
           ) : (
             <div style={{ marginTop: "20px" }}>
               <div
-                style={{ fontSize: "30px", fontWeight: 800, color: "#bbf7d0" }}
+                style={{
+                  fontSize: "30px",
+                  fontWeight: 800,
+                  color: "#bbf7d0",
+                }}
               >
                 {t.thanks}
               </div>
@@ -906,301 +1579,97 @@ export default function App() {
     );
   }
 
-  return (
-    <div style={containerStyle}>
-      <div style={cardStyle}>
-        <YanmarLogo />
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-            marginTop: "18px",
-            marginBottom: "18px",
-          }}
-        >
-          <div
-            style={{
-              padding: "8px 14px",
-              borderRadius: "999px",
-              background: team === "netherlands" ? "#ff8c00" : "#0f2747",
-              fontWeight: 700,
-              boxShadow: "0 10px 20px rgba(0,0,0,0.16)",
-            }}
-          >
-            {team === "netherlands" ? "🇳🇱 Team Netherlands" : "🇯🇵 Team Japan"}
-          </div>
-          <div
-            style={{
-              padding: "8px 14px",
-              borderRadius: "999px",
-              background: "rgba(255,255,255,0.14)",
-              fontWeight: 700,
-              boxShadow:
-                displayScore !== score
-                  ? "0 0 0 8px rgba(250,204,21,0.12)"
-                  : "0 10px 20px rgba(0,0,0,0.12)",
-              transform: displayScore !== score ? "scale(1.06)" : "scale(1)",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
-            }}
-          >
-            ⚽ {t.goals}: {displayScore}
-          </div>
-          <div
-            style={{
-              padding: "8px 14px",
-              borderRadius: "999px",
-              background: "rgba(255,255,255,0.14)",
-              fontWeight: 700,
-              boxShadow: "0 10px 20px rgba(0,0,0,0.12)",
-            }}
-          >
-            {t.round} {current + 1}/{questions.length}
-          </div>
-        </div>
+  function renderGameScreen() {
+    const currentOutcome =
+      shotState === "goal"
+        ? t.goalText
+        : shotState === "save"
+        ? t.saveText
+        : shotState === "miss"
+        ? t.missText
+        : "";
 
-        <h2 style={{ fontSize: "34px", marginBottom: "18px" }}>{q.question}</h2>
+    const feedbackTitle =
+      selected === q.correct
+        ? `${t.correctText} ${t.goalText}`
+        : `${t.wrongText} ${currentOutcome}`;
 
-        <div
-          style={{
-            margin: "20px auto",
-            width: "100%",
-            height: 300,
-            borderRadius: 26,
-            background:
-              "linear-gradient(180deg, #93c5fd 0%, #86efac 30%, #166534 100%)",
-            position: "relative",
-            overflow: "hidden",
-            boxShadow:
-              "inset 0 18px 30px rgba(255,255,255,0.18), inset 0 -14px 22px rgba(0,0,0,0.18)",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 70,
-              background: "linear-gradient(180deg, #0f172a, #1e293b)",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              top: 28,
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: 250,
-              height: 116,
-              border: "6px solid white",
-              borderBottom: "none",
-              borderRadius: "18px 18px 0 0",
-              background:
-                "repeating-linear-gradient(90deg, rgba(255,255,255,0.22) 0 10px, rgba(255,255,255,0.06) 10px 20px)",
-              boxShadow:
-                shotState === "goal"
-                  ? "0 0 24px rgba(255,255,255,0.26)"
-                  : "none",
-              transition: "box-shadow 0.3s ease",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              top: 78,
-              left:
-                shotState === "save"
-                  ? "66%"
-                  : shotState === "goal"
-                  ? "48%"
-                  : "50%",
-              transform:
-                shotState === "save"
-                  ? "translateX(-50%) rotate(22deg) scale(1.14)"
-                  : shotState === "goal"
-                  ? "translateX(-50%) rotate(-6deg) scale(0.98)"
-                  : "translateX(-50%) rotate(0deg) scale(1)",
-              transition: "all 0.48s cubic-bezier(.2,.8,.2,1)",
-              zIndex: 4,
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-            }}
-          >
+    return (
+      <div className="app-shell">
+        <div className={`main-card ${screenFading ? "fading" : ""}`}>
+          <YanmarLogo />
+
+          <div className="top-row">
             <div
+              className="pill"
               style={{
-                fontSize: 72,
-                lineHeight: 1,
-                filter: "drop-shadow(0 6px 12px rgba(0,0,0,0.25))",
+                background: team === "netherlands" ? "#ff8c00" : "#0f2747",
               }}
             >
-              🧤
+              {team === "netherlands" ? "🇳🇱 Team Netherlands" : "🇯🇵 Team Japan"}
             </div>
+
             <div
-              style={{
-                fontSize: 72,
-                lineHeight: 1,
-                filter: "drop-shadow(0 6px 12px rgba(0,0,0,0.25))",
-              }}
+              className={`pill score-pill ${
+                displayScore !== score ? "bump" : ""
+              }`}
             >
-              🧤
+              ⚽ {t.goals}: {displayScore}
+            </div>
+
+            <div className="pill">
+              {t.round} {current + 1}/{questions.length}
             </div>
           </div>
-          <div
-            style={{
-              position: "absolute",
-              bottom:
-                shotState === "goal" ? 176 : shotState === "save" ? 118 : 18,
-              left:
-                shotState === "save"
-                  ? "66%"
-                  : shotState === "goal"
-                  ? "36%"
-                  : "50%",
-              transform:
-                shotState === "goal"
-                  ? "translateX(-50%) scale(0.7) rotate(-22deg)"
-                  : shotState === "save"
-                  ? "translateX(-50%) scale(0.92) rotate(6deg)"
-                  : "translateX(-50%) scale(1) rotate(0deg)",
-              fontSize: 40,
-              transition: "all 0.48s cubic-bezier(.2,.8,.2,1)",
-              zIndex: 3,
-              filter: "drop-shadow(0 6px 10px rgba(0,0,0,0.28))",
-            }}
-          >
-            ⚽
-          </div>
-          {shotState === "goal" ? (
-            <div
-              style={{
-                position: "absolute",
-                top: 108,
-                left: "36%",
-                transform: "translateX(-50%)",
-                width: 132,
-                height: 132,
-                borderRadius: "999px",
-                border: "3px solid rgba(255,255,255,0.3)",
-                boxShadow: "0 0 0 14px rgba(255,255,255,0.06)",
-                opacity: 0.8,
-              }}
-            />
-          ) : null}
-          <div
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: 72,
-              background: "rgba(255,255,255,0.08)",
-            }}
-          />
-        </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr",
-            gap: "10px",
-            maxWidth: "680px",
-            margin: "0 auto",
-          }}
-        >
-          {q.answers.map((a, i) => {
-            const isCorrect = i === q.correct;
-            const isChosen = i === selected;
-            let dynamicStyle = { ...answerButtonStyle };
+          <h2 className="question-title">{q.question}</h2>
 
-            if (showFeedback) {
-              if (isCorrect) {
-                dynamicStyle = {
-                  ...dynamicStyle,
-                  background: "linear-gradient(180deg, #dcfce7, #bbf7d0)",
-                  border: "1px solid #22c55e",
-                };
-              } else if (isChosen) {
-                dynamicStyle = {
-                  ...dynamicStyle,
-                  background: "linear-gradient(180deg, #fee2e2, #fecaca)",
-                  border: "1px solid #ef4444",
-                };
-              } else {
-                dynamicStyle = {
-                  ...dynamicStyle,
-                  opacity: 0.74,
-                };
-              }
-            }
+          <PenaltyArena shotState={shotState} shotKey={shotKey} t={t} />
 
-            return (
+          <div className="answer-grid">
+            {q.answers.map((answer, index) => (
               <button
-                key={i}
-                onClick={() => handleAnswer(i)}
-                style={dynamicStyle}
-                onMouseEnter={(e) => {
-                  if (!showFeedback) {
-                    e.currentTarget.style.transform = "translateY(-1px)";
-                    e.currentTarget.style.boxShadow =
-                      "0 14px 24px rgba(0,0,0,0.18)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow =
-                    dynamicStyle.boxShadow || "0 10px 20px rgba(0,0,0,0.15)";
-                }}
-                onMouseDown={(e) => {
-                  if (!showFeedback)
-                    e.currentTarget.style.transform = "scale(0.985)";
-                }}
-                onMouseUp={(e) => {
-                  if (!showFeedback)
-                    e.currentTarget.style.transform = "translateY(-1px)";
-                }}
+                key={answer}
+                className={`answer-button ${getAnswerClass(index)}`}
+                disabled={showFeedback || selected !== null}
+                onClick={() => handleAnswer(index)}
               >
-                {a}
+                {answer}
               </button>
-            );
-          })}
-        </div>
-
-        {showFeedback && (
-          <div
-            style={{
-              marginTop: "18px",
-              padding: "18px",
-              borderRadius: "18px",
-              background: "rgba(255,255,255,0.14)",
-              border: "1px solid rgba(255,255,255,0.16)",
-            }}
-          >
-            <h3 style={{ marginTop: 0, fontSize: "28px" }}>
-              {selected === q.correct ? t.goalText : t.saveText}
-            </h3>
-            <p style={{ marginBottom: "16px", opacity: 0.96 }}>{q.fact}</p>
-            <button
-              onClick={next}
-              style={{
-                padding: "14px 22px",
-                borderRadius: "14px",
-                border: "none",
-                cursor: "pointer",
-                fontWeight: 800,
-                background: "linear-gradient(180deg, #fef08a, #facc15)",
-                color: "#0f172a",
-                boxShadow: "0 14px 24px rgba(0,0,0,0.22)",
-              }}
-            >
-              {isLastQuestion ? t.finish : t.next}
-            </button>
+            ))}
           </div>
-        )}
+
+          {showFeedback ? (
+            <div className="feedback-box">
+              <div className={`feedback-title ${shotState}`}>
+                {feedbackTitle}
+              </div>
+
+              <div style={{ opacity: 0.95 }}>{q.fact}</div>
+
+              <button className="next-button" onClick={next}>
+                {isLastQuestion ? t.finish : t.next}
+              </button>
+            </div>
+          ) : null}
+        </div>
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <>
+      <GlobalStyles />
+
+      {!language
+        ? renderLanguageScreen()
+        : !team
+        ? renderTeamScreen()
+        : !started
+        ? renderStartScreen()
+        : current >= questions.length
+        ? renderFinalScreen()
+        : renderGameScreen()}
+    </>
   );
 }
